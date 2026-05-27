@@ -66,6 +66,19 @@ The chatbot aims to raise cybersecurity awareness in an engaging, low‑pressure
   - Add more topics
   - add more advanced features
   - Store user interaction history
+
+ # References
+ -  DeepSeek-AI (2025). *DeepSeek-R1: Incentivizing Reasoning Capability in LLMs via Reinforcement Learning*. Available at: https://arxiv.org/abs/2501.12948 (Accessed: [20/05/2026]).
+ -  IAmTimCorey (Year of upload) Intro to Windows Forms (WinForms) in .NET 6. YouTube. Available at: https://www.youtube.com/watch?v=0zLZQesgV5o (Accessed: Day Month Year).
+ -  ProgrammingKnowledge2 (2023) Create Your First C# Windows Forms Application using Visual Studio. YouTube. Available at: https://www.youtube.com/watch?v=JSJ1JI2alJg (Accessed: Day Month Year).
     
 # Screenshots
+- <img width="1366" height="768" alt="Screenshot 2026-05-27 192310" src="https://github.com/user-attachments/assets/20151c3b-00fd-47dc-9289-a7791d60f51e" /> Programm greets he user and asks for their name
+- <img width="1366" height="768" alt="Screenshot 2026-05-27 192351" src="https://github.com/user-attachments/assets/49461923-aac2-46f4-8840-5b85e2dde978" /> Program provides available topics
+- <img width="1366" height="768" alt="Screenshot 2026-05-27 192631" src="https://github.com/user-attachments/assets/62f78206-6e32-4b0e-b2eb-02a6b1bc49d5" /> user asks for questions
+- <img width="1366" height="768" alt="Screenshot 2026-05-27 192655" src="https://github.com/user-attachments/assets/5c539183-d3da-4e45-81b6-908ba37c65f7" /> error validation for empty insert
+-  <img width="1366" height="768" alt="Screenshot 2026-05-27 192910" src="https://github.com/user-attachments/assets/39da01b9-acb6-4e5e-b6ac-5882ac6dcd32" />
+ 
+
+
 
