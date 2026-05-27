@@ -4,8 +4,10 @@ using System.Text;
 
 namespace CyberSecurityAwarenessChatBot
 {
+    // Analyzes user input to detect emotional tone (sentiment) and returns appropriate empathetic responses.
     public static class SentimentDetector
     {
+        // Maps keywords to sentiment categories (e.g., "worried", "curious", "frustrated").
         private static readonly Dictionary<string, string> SentimentKeywords = new()
         {
             { "worried", "worried" }, { "afraid", "worried" }, { "scared", "worried" }, { "concerned", "worried" },
@@ -14,6 +16,8 @@ namespace CyberSecurityAwarenessChatBot
             { "confused", "frustrated" }, { "difficult", "frustrated" }, { "hard", "frustrated" }
         };
 
+        // Scans the user's input for sentiment keywords.
+        // Returns the sentiment category if found, otherwise empty string.
         public static string DetectSentiment(string input)
         {
             if (string.IsNullOrWhiteSpace(input)) return "";
@@ -23,6 +27,8 @@ namespace CyberSecurityAwarenessChatBot
             return "";
         }
 
+        // Generates an empathetic response based on detected sentiment and optional topic.
+        // If topic is provided, the response will reference it.
         public static string GetSentimentResponse(string sentiment, string topic = null)
         {
             return sentiment switch

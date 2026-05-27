@@ -1,59 +1,60 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace CyberSecurityAwarenessChatBot
 {
+    // Manages the ongoing conversation state: tracks the current topic being discussed
+    // and determines if a user's message is a follow-up request.
     public class ConversationManager
     {
-        private string? _currentTopic;
-        private int _followUpCount;
+        // Stores the topic (e.g., "password", "scam", "privacy", "phishing") that the bot last provided information about.
+        // Used to give relevant follow-up responses when the user asks for "more" or "another tip".
+        private string currentTopic;   // Do NOT rename while debugging – stop app first
 
+        // Constructor: initializes the conversation manager with no active topic.
         public ConversationManager()
         {
-            _currentTopic = null;
-            _followUpCount = 0;
+            currentTopic = null;
         }
 
+        // Sets the current conversation topic (called after the bot gives an answer about a specific topic).
         public void SetCurrentTopic(string topic)
         {
-            _currentTopic = topic?.ToLower();
-            _followUpCount = 0;
+            currentTopic = topic;
         }
 
-        public bool IsFollowUpRequest(string userInput)
+        // Returns the current topic (so the bot knows what subject the user might want more info about).
+        public string GetCurrentTopic()
         {
-            if (string.IsNullOrEmpty(_currentTopic)) return false;
-            string input = userInput.ToLower();
-            return input.Contains("more") || input.Contains("another") || input.Contains("explain") ||
-                   input.Contains("tell me more") || input.Contains("continue") || input.Contains("elaborate");
+            return currentTopic;
         }
 
+        // Examines the user's input to see if they are asking for additional information on the same topic.
+        // Returns true if the input contains common follow-up phrases (e.g., "tell me more", "another tip").
+        public bool IsFollowUpRequest(string input)
+        {
+            if (string.IsNullOrEmpty(input)) return false;
+            string lower = input.ToLower();
+            return lower.Contains("tell me more") ||
+                   lower.Contains("another tip") ||
+                   lower.Contains("explain more") ||
+                   lower.Contains("more details") ||
+                   lower.Contains("more") ||
+                   lower.Contains("go on");
+        }
+
+        // Generates a follow-up response for the current topic using the provided RandomResponseManager.
+        // Returns a random tip for the current topic if one exists, otherwise returns null.
         public string GetFollowUpResponse(RandomResponseManager randomResponse)
         {
-            if (string.IsNullOrEmpty(_currentTopic)) return null;
-            if (_followUpCount >= 3)
-                return "That's all I have on this topic for now. Feel free to ask about another cybersecurity area!";
+            // If no topic has been set, there's nothing to follow up on.
+            if (string.IsNullOrEmpty(currentTopic))
+                return null;
 
-            _followUpCount++;
-            string response = randomResponse.GetRandomResponse(_currentTopic);
-            if (response != null)
-                return "Here's another tip: " + response;
+            // Ask the RandomResponseManager for a new tip on the current topic.
+            if (randomResponse != null && randomResponse.SupportsTopic(currentTopic))
+                return randomResponse.GetRandomResponse(currentTopic);
 
-            return _currentTopic switch
-            {
-                "password" => "Also, avoid writing down passwords – use a secure password manager instead.",
-                "scam" => "Another sign of a scam: they ask for payment via gift cards or wire transfer.",
-                "privacy" => "Remember to log out of accounts on shared devices.",
-                "phishing" => "Forward suspicious emails to report@phishing.gov.",
-                _ => "Could you ask more specifically about cybersecurity?"
-            };
-        }
-
-        public void Reset()
-        {
-            _currentTopic = null;
-            _followUpCount = 0;
+            return null;
         }
     }
 }

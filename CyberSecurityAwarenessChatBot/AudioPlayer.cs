@@ -6,21 +6,21 @@ using System.Windows;
 
 namespace CyberSecurityAwarenessChatBot
 {
+    // Simple audio utility that plays a welcome sound when the chat bot starts.
     public class AudioPlayer
     {
+        // Plays a greeting sound from a file named "Welcome.wav".
         public static void PlayGreeting()
         {
             try
             {
-                // LOAD AUDIO FILE
-                SoundPlayer player =
-                    new SoundPlayer("Welcome.wav");
+                // Load the audio file (assumed to be in the application's working directory).
+                SoundPlayer player = new SoundPlayer("Welcome.wav");
 
-                // PLAY AUDIO
+                // Play the sound asynchronously (does not block the UI).
                 player.Play();
             }
-
-            // EXCEPTION HANDLING
+            // Catch any errors (e.g., missing file, unsupported format) and show a message box.
             catch (Exception ex)
             {
                 MessageBox.Show(

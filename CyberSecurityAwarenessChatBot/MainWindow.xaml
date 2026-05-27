@@ -1,4 +1,17 @@
-﻿<Window x:Class="CyberSecurityAwarenessChatBot.MainWindow"
+﻿<!-- 
+    MainWindow.xaml
+    This XAML file defines the user interface for a CyberSecurity Awareness Chatbot application.
+    The window provides a chat interface with a custom-styled border, a chat display area,
+    a user input textbox, and a send button.
+-->
+
+<!-- 
+    Window element: The root container for the application's main window.
+    x:Class specifies the code-behind class that handles events and logic.
+    Various xmlns declarations import required WPF namespaces and the local project namespace.
+    Title sets the window title, Height and Width define the initial window size.
+-->
+    <Window x:Class="CyberSecurityAwarenessChatBot.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -7,7 +20,18 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid Background="MediumAquamarine">
-
+        <!-- 
+            Border: Creates a decorative border around the title and ASCII art.
+            - BorderBrush: Color of the border (Aquamarine)
+            - BorderThickness: Width of the border
+            - CornerRadius: Rounds the corners of the border for a modern look
+            - Padding: Space between border content and its inner edge
+            - Background: Fill color inside the border
+            - HorizontalAlignment="Center": Centers the border horizontally within the Grid
+            - VerticalAlignment="Top": Positions the border at the top of the Grid
+            - Margin: Outer spacing (top 10, others 0)
+            - Height/Width: Fixed size for the header area
+        -->
         <Border BorderBrush="Aquamarine"
     BorderThickness="3"
     CornerRadius="15"
@@ -17,7 +41,21 @@
     VerticalAlignment="Top"
     Margin="0,10,0,0" Height="222" Width="342">
 
+            <!-- 
+                StackPanel: Arranges child elements vertically (default orientation).
+                Contains the title TextBlock and the ASCII art TextBlock.
+            -->
             <StackPanel>
+
+                <!-- TITLE -->
+                <!-- 
+                    TextBlock: Displays the chatbot title.
+                    - FontSize: Size of the text
+                    - FontWeight: Bold makes the title stand out
+                    - Foreground: Text color (DarkBlue)
+                    - HorizontalAlignment: Centers text within the StackPanel
+                    - Margin: Bottom spacing to separate from ASCII art
+                -->
 
                 <!-- TITLE -->
                 <TextBlock Text="CyberSecurity Awareness Chatbot"
@@ -84,7 +122,8 @@
          BorderThickness="0"
          Background="Transparent"
          FontSize="14"
-         Padding="10,5,10,5"/>
+         Padding="10,5,10,5"
+         KeyDown="UserInput_KeyDown"/>
 
         </Border>
 

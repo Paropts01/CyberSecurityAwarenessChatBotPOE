@@ -1,42 +1,57 @@
-﻿using CyberSecurityAwarenessChatBot;
+﻿// MainWindow.xaml.cs - Code-behind for the CyberSecurity Chatbot UI
+// Handles user input, chatbot responses, and UI interactions
+
 using System;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Documents;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace CyberSecurityAwarenessChatBot
 {
     public partial class MainWindow : Window
     {
-        private Chatbot chatbot;
-        private CyberSecurityChatBot cyberBot;
-        private RandomResponseManager randomResponse;
-        private ConversationManager conversationManager;
-        private bool awaitingName = true;
+        // Private fields for the chatbot's core components
+        private Chatbot chatbot;                       // Manages user name and favorite topic
+        private CyberSecurityChatBot cyberBot;         // Provides keyword-based cybersecurity responses
+        private RandomResponseManager randomResponse;  // Gives random tips on specific topics
+        private ConversationManager conversationManager; // Tracks current topic and follow-up requests
+        private bool awaitingName = true;              // Flag to indicate if we're still waiting for user's name
 
+        // Constructor: initializes components and sets up the chat
         public MainWindow()
         {
             InitializeComponent();
+
+            // Set up the chat display document with comfortable line height
+            ChatDisplay.Document = new FlowDocument();
+            ChatDisplay.Document.LineHeight = 1.2;
+
+            // Instantiate helper classes
             chatbot = new Chatbot();
             cyberBot = new CyberSecurityChatBot();
             randomResponse = new RandomResponseManager();
             conversationManager = new ConversationManager();
-            AudioPlayer.PlayGreeting();   // plays Welcome.wav
+
+            // Play a greeting sound and display welcome message
+            AudioPlayer.PlayGreeting();
             DisplayWelcomeMessage();
         }
 
+        // Displays the initial welcome message with typing animation effect
         private async void DisplayWelcomeMessage()
         {
-            await TypingStyle.TypeText(ChatDisplay, "Bot", "Hello! I'm your Cybersecurity Assistant.", Brushes.DarkBlue);
-            await TypingStyle.TypeText(ChatDisplay, "Bot", "What's your name?", Brushes.DarkBlue);
+            await TypingStyle.TypeText(ChatDisplay, "Bot", "Hello! Welcome to the Cyber Security Awareness Chat Bot!", Brushes.DarkBlue);
+            await TypingStyle.TypeText(ChatDisplay, "Bot", "What is your name?", Brushes.DarkBlue);
         }
 
+        // Handles the Send button click and Enter key press (via UserInput_KeyDown)
         private async void SendButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
+                // Get and validate user input
                 string input = UserInput.Text.Trim();
                 if (!cyberBot.ValidateInput(input))
                 {
@@ -44,10 +59,10 @@ namespace CyberSecurityAwarenessChatBot
                     return;
                 }
 
-                // Show user message (DarkGoldenrod)
+                // Display user's message in the chat
                 await TypingStyle.TypeText(ChatDisplay, "You", input, Brushes.DarkGoldenrod);
 
-                // Exit command
+                // Exit command handling
                 if (input.ToLower() == "exit" || input.ToLower() == "quit" || input.ToLower() == "goodbye")
                 {
                     string userName = chatbot.GetUserName() ?? "friend";
@@ -57,24 +72,50 @@ namespace CyberSecurityAwarenessChatBot
                     return;
                 }
 
-                // First: get user name
+                // First interaction: get and store user's name
                 if (awaitingName)
                 {
                     chatbot.SetUserName(input);
                     await ShowTemporaryThinking(1500);
                     await TypingStyle.TypeText(ChatDisplay, "Bot", $"Nice to meet you, {chatbot.GetUserName()}!", Brushes.DarkBlue);
-                    await TypingStyle.TypeText(ChatDisplay, "Bot", $"Thanks, {chatbot.GetUserName()}! Here are the cybersecurity topics I can help you with:", Brushes.DarkBlue);
-                    await TypingStyle.TypeText(ChatDisplay, "Bot", "- Password Safety", Brushes.DarkBlue);
-                    await TypingStyle.TypeText(ChatDisplay, "Bot", "- Privacy Protection", Brushes.DarkBlue);
-                    await TypingStyle.TypeText(ChatDisplay, "Bot", "- Scam Detection", Brushes.DarkBlue);
-                    await TypingStyle.TypeText(ChatDisplay, "Bot", "- Phishing Tips", Brushes.DarkBlue);
+                    await TypingStyle.TypeText(ChatDisplay, "Bot", $"Here are the cybersecurity topics I can help you with:\n- Password Safety\n- Privacy Protection\n- Scam Detection\n- Phishing Tips", Brushes.DarkBlue);
                     await TypingStyle.TypeText(ChatDisplay, "Bot", "What would you like to talk about today? (Type 'exit' to quit)", Brushes.DarkBlue);
                     awaitingName = false;
                     UserInput.Clear();
                     return;
                 }
 
-                // Sentiment detection (empathethic)
+                // ========== 1. TIP DETECTION ==========
+                // If user asks for a "tip", extract the topic and give a random response
+                if (input.ToLower().Contains("tip"))
+                {
+                    await ShowTemporaryThinking(1200);
+                    string detectedTopic = null;
+                    string lower = input.ToLower();
+                    if (lower.Contains("password")) detectedTopic = "password";
+                    else if (lower.Contains("scam")) detectedTopic = "scam";
+                    else if (lower.Contains("privacy")) detectedTopic = "privacy";
+                    else if (lower.Contains("phishing")) detectedTopic = "phishing";
+
+                    if (detectedTopic != null && randomResponse.SupportsTopic(detectedTopic))
+                    {
+                        string tip = randomResponse.GetRandomResponse(detectedTopic);
+                        string prefix = GetFriendlyPrefix();
+                        await TypingStyle.TypeText(ChatDisplay, "Bot", prefix + " " + tip, Brushes.DarkBlue);
+                        conversationManager.SetCurrentTopic(detectedTopic);
+                        UserInput.Clear();
+                        return;
+                    }
+                    else
+                    {
+                        await TypingStyle.TypeText(ChatDisplay, "Bot", "Please mention a topic with your tip request, e.g., 'give me a password tip'.", Brushes.DarkBlue);
+                        UserInput.Clear();
+                        return;
+                    }
+                }
+
+                // ========== 2. SENTIMENT DETECTION ==========
+                // Detect emotional tone and respond with empathy, then optionally give a tip
                 string sentiment = SentimentDetector.DetectSentiment(input);
                 if (!string.IsNullOrEmpty(sentiment))
                 {
@@ -101,20 +142,28 @@ namespace CyberSecurityAwarenessChatBot
                     return;
                 }
 
-                // Follow-up (conversation flow)
+                // ========== 3. FOLLOW-UP REQUEST ==========
+                // If user asks "tell me more", give a different tip on the same topic
                 if (conversationManager.IsFollowUpRequest(input))
                 {
                     await ShowTemporaryThinking(1200);
-                    string followUp = conversationManager.GetFollowUpResponse(randomResponse);
-                    if (string.IsNullOrEmpty(followUp))
-                        followUp = "What topic would you like to learn more about? (Password, Scam, Privacy, Phishing)";
-                    string prefix = GetFriendlyPrefix();
-                    await TypingStyle.TypeText(ChatDisplay, "Bot", prefix + " " + followUp, Brushes.DarkBlue);
+                    string currentTopic = conversationManager.GetCurrentTopic();
+                    if (!string.IsNullOrEmpty(currentTopic) && randomResponse.SupportsTopic(currentTopic))
+                    {
+                        string newTip = randomResponse.GetRandomResponse(currentTopic);
+                        string prefix = GetFriendlyPrefix();
+                        await TypingStyle.TypeText(ChatDisplay, "Bot", prefix + " Here's another tip: " + newTip, Brushes.DarkBlue);
+                    }
+                    else
+                    {
+                        await TypingStyle.TypeText(ChatDisplay, "Bot", "What topic would you like to learn more about? (Password, Scam, Privacy, Phishing)", Brushes.DarkBlue);
+                    }
                     UserInput.Clear();
                     return;
                 }
 
-                // Memory: set favourite topic
+                // ========== 4. MEMORY: USER'S FAVORITE TOPIC ==========
+                // If user expresses interest in a topic, remember it for later
                 string lowerInput = input.ToLower();
                 if ((lowerInput.Contains("interested in") || lowerInput.Contains("i like") || lowerInput.Contains("my favourite")) &&
                     (lowerInput.Contains("password") || lowerInput.Contains("privacy") || lowerInput.Contains("scam") || lowerInput.Contains("phishing")))
@@ -135,45 +184,20 @@ namespace CyberSecurityAwarenessChatBot
                     }
                 }
 
-                // Keyword recognition with random responses
+                // ========== 5. KEYWORD RECOGNITION ==========
+                // Provide detailed answers for cybersecurity keywords (e.g., "password", "phishing")
                 if (cyberBot.ContainsKeyword(input))
                 {
                     await ShowTemporaryThinking(1200);
-                    string matchedTopic = null;
-                    string lower = input.ToLower();
-                    if (lower.Contains("password")) matchedTopic = "password";
-                    else if (lower.Contains("scam")) matchedTopic = "scam";
-                    else if (lower.Contains("privacy")) matchedTopic = "privacy";
-                    else if (lower.Contains("phishing")) matchedTopic = "phishing";
-
-                    if (matchedTopic != null && randomResponse.SupportsTopic(matchedTopic))
-                    {
-                        string prefix = GetFriendlyPrefix();
-                        string tip = randomResponse.GetRandomResponse(matchedTopic);
-                        await TypingStyle.TypeText(ChatDisplay, "Bot", prefix + " " + tip, Brushes.DarkBlue);
-                        conversationManager.SetCurrentTopic(matchedTopic);
-
-                        // Recall favourite topic occasionally
-                        string fav = chatbot.GetFavouriteTopic();
-                        if (!string.IsNullOrEmpty(fav) && fav == matchedTopic && new Random().Next(0, 3) == 0)
-                        {
-                            await Task.Delay(500);
-                            string recallPrefix = GetFriendlyPrefix();
-                            string recallTip = randomResponse.GetRandomResponse(fav);
-                            await TypingStyle.TypeText(ChatDisplay, "Bot", recallPrefix + " As someone interested in " + fav + ", you might also like: " + recallTip, Brushes.DarkBlue);
-                        }
-                    }
-                    else
-                    {
-                        string prefix = GetFriendlyPrefix();
-                        string response = cyberBot.GetKeywordResponse(input);
-                        await TypingStyle.TypeText(ChatDisplay, "Bot", prefix + " " + response, Brushes.DarkBlue);
-                    }
+                    string response = cyberBot.GetKeywordResponse(input);
+                    string prefix = GetFriendlyPrefix();
+                    await TypingStyle.TypeText(ChatDisplay, "Bot", prefix + " " + response, Brushes.DarkBlue);
                     UserInput.Clear();
                     return;
                 }
 
-                // Default / unknown input
+                // ========== 6. DEFAULT FALLBACK ==========
+                // When no pattern matches, ask user to rephrase
                 await ShowTemporaryThinking(1000);
                 string name = chatbot.GetUserName() ?? "friend";
                 string defaultMsg = $"I'm not sure I understand, {name}. Could you try rephrasing? Ask about passwords, scams, privacy, or phishing.";
@@ -186,14 +210,17 @@ namespace CyberSecurityAwarenessChatBot
             }
         }
 
-        // Press Enter to send
-        private void UserInput_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        // Allows user to press Enter to send message instead of clicking Send button
+        private void UserInput_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == System.Windows.Input.Key.Enter)
+            if (e.Key == Key.Enter)
+            {
                 SendButton_Click(sender, null);
+                e.Handled = true;   // Suppress default beep sound
+            }
         }
 
-        // Friendly personalised prefix using user's name
+        // Returns a random friendly prefix using the user's name for personalization
         private string GetFriendlyPrefix()
         {
             string name = chatbot.GetUserName();
@@ -214,12 +241,12 @@ namespace CyberSecurityAwarenessChatBot
             return prefixes[rnd.Next(prefixes.Length)];
         }
 
-        // Temporary "Thinking..." message that disappears
+        // Displays a temporary "Thinking..." message while processing, then removes it after delay
         private async Task ShowTemporaryThinking(int delayMs = 1500)
         {
             Paragraph tempParagraph = new Paragraph();
             Run tempRun = new Run("System: Thinking...");
-            tempRun.Foreground = Brushes.Orange;
+            tempRun.Foreground = Brushes.DarkGoldenrod;
             tempRun.FontWeight = FontWeights.Bold;
             tempParagraph.Inlines.Add(tempRun);
             ChatDisplay.Document.Blocks.Add(tempParagraph);
