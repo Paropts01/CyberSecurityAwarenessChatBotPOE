@@ -6,7 +6,102 @@
         xmlns:local="clr-namespace:CyberSecurityAwarenessChatBot"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
+    <Grid Background="MediumAquamarine">
+
+        <Border BorderBrush="Aquamarine"
+    BorderThickness="3"
+    CornerRadius="15"
+    Padding="10"
+    Background="Aquamarine"
+    HorizontalAlignment="Center"
+    VerticalAlignment="Top"
+    Margin="0,10,0,0" Height="222" Width="342">
+
+            <StackPanel>
+
+                <!-- TITLE -->
+                <TextBlock Text="CyberSecurity Awareness Chatbot"
+           FontSize="20"
+           FontWeight="Bold"
+           Foreground="DarkBlue"
+           HorizontalAlignment="Center"
+           Margin="0,0,0,15"/>
+
+                <!-- ASCII ART -->
+                <TextBlock FontFamily="Consolas"
+           FontSize="12"
+           FontWeight="Bold"
+           Foreground="DarkBlue"
+           TextWrapping="NoWrap"
+           HorizontalAlignment="Center" Width="380" Height="150">
+
+    <Run Text="                  _(,__           __),&#10;"/>
+    <Run Text="             (_,d888888888b,d888888888b&#10;"/>
+    <Run Text="              d888888888888/888888888888b_)&#10;"/>
+    <Run Text="           (_8888888P'&quot;&quot;&quot;'`Y8Y`'&quot;'&quot;&quot;Y88888&#10;"/>
+    <Run Text="             Y8888P.-'     `      '-.Y8888b_)&#10;"/>
+    <Run Text="            ,_Y88P (_(_(        )_)_) d88Y_,&#10;"/>
+    <Run Text="             Y88b,  ( o )      ( o ) d8888P&#10;"/>
+    <Run Text="             `Y888   '-'        '-'  `88Y`&#10;"/>
+    <Run Text="             ,d/O\         c         /O\b,&#10;"/>
+    <Run Text="               \_/'.,______w______,.'\_/"/>
+
+                </TextBlock>
+
+            </StackPanel>
+
+        </Border>
+
+        <!-- CHAT DISPLAY -->
+        <!-- ROUNDED CHAT DISPLAY -->
+        <Border CornerRadius="10"
+    BorderThickness="2"
+    BorderBrush="DarkBlue"
+    Background="Aquamarine"
+    Margin="20,250,20,90">
+
+            <RichTextBox Name="ChatDisplay"
+         BorderThickness="0"
+         Background="Transparent"
+         FontSize="14"
+         Padding="10"
+         IsReadOnly="True"
+         VerticalScrollBarVisibility="Auto"/>
+
+        </Border>
+
+        <!-- USER INPUT -->
+        <!-- ROUNDED TEXTBOX -->
+        <Border CornerRadius="10"
+    BorderThickness="2"
+    BorderBrush="DarkBlue"
+    Background="Aquamarine"
+    Height="40"
+    Margin="20,0,120,20"
+    VerticalAlignment="Bottom">
+
+            <TextBox Name="UserInput"
+         BorderThickness="0"
+         Background="Transparent"
+         FontSize="14"
+         Padding="10,5,10,5"/>
+
+        </Border>
+
+        <!-- SEND BUTTON -->
+        <Button Content="Send"
+    Width="80"
+    Height="40"
+    HorizontalAlignment="Right"
+    Margin="0,0,20,20"
+    VerticalAlignment="Bottom"
+    Background="DarkBlue"
+    Foreground="White"
+    FontWeight="Bold"
+    BorderThickness="0"
+    Click="SendButton_Click"/>
+
+
 
     </Grid>
 </Window>
