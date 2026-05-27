@@ -4,7 +4,7 @@ using System.Text;
 
 namespace CyberSecurityAwarenessChatBot
 {
-    class RandomResponseManager
+    public class RandomResponseManager
     {
         private readonly Dictionary<string, List<string>> _responsePool;
 

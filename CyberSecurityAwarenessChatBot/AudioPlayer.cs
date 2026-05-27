@@ -6,7 +6,7 @@ using System.Windows;
 
 namespace CyberSecurityAwarenessChatBot
 {
-    class AudioPlayer
+    public class AudioPlayer
     {
         public static void PlayGreeting()
         {
