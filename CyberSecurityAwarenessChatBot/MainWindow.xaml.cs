@@ -23,7 +23,7 @@ namespace CyberSecurityAwarenessChatBot
             cyberBot = new CyberSecurityChatBot();
             randomResponse = new RandomResponseManager();
             conversationManager = new ConversationManager();
-            AudioPlayer.PlayGreeting();
+            AudioPlayer.PlayGreeting();   // plays Welcome.wav
             DisplayWelcomeMessage();
         }
 
@@ -44,8 +44,10 @@ namespace CyberSecurityAwarenessChatBot
                     return;
                 }
 
+                // Show user message (DarkGoldenrod)
                 await TypingStyle.TypeText(ChatDisplay, "You", input, Brushes.DarkGoldenrod);
 
+                // Exit command
                 if (input.ToLower() == "exit" || input.ToLower() == "quit" || input.ToLower() == "goodbye")
                 {
                     string userName = chatbot.GetUserName() ?? "friend";
@@ -55,9 +57,11 @@ namespace CyberSecurityAwarenessChatBot
                     return;
                 }
 
+                // First: get user name
                 if (awaitingName)
                 {
                     chatbot.SetUserName(input);
+                    await ShowTemporaryThinking(1500);
                     await TypingStyle.TypeText(ChatDisplay, "Bot", $"Nice to meet you, {chatbot.GetUserName()}!", Brushes.DarkBlue);
                     await TypingStyle.TypeText(ChatDisplay, "Bot", $"Thanks, {chatbot.GetUserName()}! Here are the cybersecurity topics I can help you with:", Brushes.DarkBlue);
                     await TypingStyle.TypeText(ChatDisplay, "Bot", "- Password Safety", Brushes.DarkBlue);
@@ -70,9 +74,11 @@ namespace CyberSecurityAwarenessChatBot
                     return;
                 }
 
+                // Sentiment detection (empathethic)
                 string sentiment = SentimentDetector.DetectSentiment(input);
                 if (!string.IsNullOrEmpty(sentiment))
                 {
+                    await ShowTemporaryThinking(1200);
                     string detectedTopic = null;
                     string lower = input.ToLower();
                     if (lower.Contains("password")) detectedTopic = "password";
@@ -95,8 +101,10 @@ namespace CyberSecurityAwarenessChatBot
                     return;
                 }
 
+                // Follow-up (conversation flow)
                 if (conversationManager.IsFollowUpRequest(input))
                 {
+                    await ShowTemporaryThinking(1200);
                     string followUp = conversationManager.GetFollowUpResponse(randomResponse);
                     if (string.IsNullOrEmpty(followUp))
                         followUp = "What topic would you like to learn more about? (Password, Scam, Privacy, Phishing)";
@@ -106,6 +114,7 @@ namespace CyberSecurityAwarenessChatBot
                     return;
                 }
 
+                // Memory: set favourite topic
                 string lowerInput = input.ToLower();
                 if ((lowerInput.Contains("interested in") || lowerInput.Contains("i like") || lowerInput.Contains("my favourite")) &&
                     (lowerInput.Contains("password") || lowerInput.Contains("privacy") || lowerInput.Contains("scam") || lowerInput.Contains("phishing")))
@@ -119,14 +128,17 @@ namespace CyberSecurityAwarenessChatBot
                     if (newFav != null)
                     {
                         chatbot.SetFavouriteTopic(newFav);
+                        await ShowTemporaryThinking(1000);
                         await TypingStyle.TypeText(ChatDisplay, "Bot", $"Great, {chatbot.GetUserName()}! I'll remember that you're interested in {newFav}. It's a crucial part of staying safe online.", Brushes.DarkBlue);
                         UserInput.Clear();
                         return;
                     }
                 }
 
+                // Keyword recognition with random responses
                 if (cyberBot.ContainsKeyword(input))
                 {
+                    await ShowTemporaryThinking(1200);
                     string matchedTopic = null;
                     string lower = input.ToLower();
                     if (lower.Contains("password")) matchedTopic = "password";
@@ -141,6 +153,7 @@ namespace CyberSecurityAwarenessChatBot
                         await TypingStyle.TypeText(ChatDisplay, "Bot", prefix + " " + tip, Brushes.DarkBlue);
                         conversationManager.SetCurrentTopic(matchedTopic);
 
+                        // Recall favourite topic occasionally
                         string fav = chatbot.GetFavouriteTopic();
                         if (!string.IsNullOrEmpty(fav) && fav == matchedTopic && new Random().Next(0, 3) == 0)
                         {
@@ -160,6 +173,8 @@ namespace CyberSecurityAwarenessChatBot
                     return;
                 }
 
+                // Default / unknown input
+                await ShowTemporaryThinking(1000);
                 string name = chatbot.GetUserName() ?? "friend";
                 string defaultMsg = $"I'm not sure I understand, {name}. Could you try rephrasing? Ask about passwords, scams, privacy, or phishing.";
                 await TypingStyle.TypeText(ChatDisplay, "Bot", defaultMsg, Brushes.DarkBlue);
@@ -171,12 +186,14 @@ namespace CyberSecurityAwarenessChatBot
             }
         }
 
+        // Press Enter to send
         private void UserInput_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
             if (e.Key == System.Windows.Input.Key.Enter)
                 SendButton_Click(sender, null);
         }
 
+        // Friendly personalised prefix using user's name
         private string GetFriendlyPrefix()
         {
             string name = chatbot.GetUserName();
@@ -195,6 +212,21 @@ namespace CyberSecurityAwarenessChatBot
             };
             Random rnd = new Random();
             return prefixes[rnd.Next(prefixes.Length)];
+        }
+
+        // Temporary "Thinking..." message that disappears
+        private async Task ShowTemporaryThinking(int delayMs = 1500)
+        {
+            Paragraph tempParagraph = new Paragraph();
+            Run tempRun = new Run("System: Thinking...");
+            tempRun.Foreground = Brushes.Orange;
+            tempRun.FontWeight = FontWeights.Bold;
+            tempParagraph.Inlines.Add(tempRun);
+            ChatDisplay.Document.Blocks.Add(tempParagraph);
+            ChatDisplay.ScrollToEnd();
+            await Task.Delay(delayMs);
+            if (ChatDisplay.Document.Blocks.Contains(tempParagraph))
+                ChatDisplay.Document.Blocks.Remove(tempParagraph);
         }
     }
 }
