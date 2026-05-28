@@ -60,7 +60,7 @@ namespace CyberSecurityAwarenessChatBot
                 }
 
                 // Display user's message in the chat
-                await TypingStyle.TypeText(ChatDisplay, "You", input, Brushes.DarkGoldenrod);
+                await TypingStyle.TypeText(ChatDisplay, "You", input, Brushes.DarkSlateBlue);
 
                 // Exit command handling
                 if (input.ToLower() == "exit" || input.ToLower() == "quit" || input.ToLower() == "goodbye")
@@ -246,7 +246,7 @@ namespace CyberSecurityAwarenessChatBot
         {
             Paragraph tempParagraph = new Paragraph();
             Run tempRun = new Run("System: Thinking...");
-            tempRun.Foreground = Brushes.DarkGoldenrod;
+            tempRun.Foreground = Brushes.DarkSlateBlue;
             tempRun.FontWeight = FontWeights.Bold;
             tempParagraph.Inlines.Add(tempRun);
             ChatDisplay.Document.Blocks.Add(tempParagraph);

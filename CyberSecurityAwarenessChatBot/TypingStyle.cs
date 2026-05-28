@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -18,8 +19,19 @@ namespace CyberSecurityAwarenessChatBot
         //   color: The color of the entire message text.
         public static async Task TypeText(RichTextBox chatDisplay, string sender, string message, Brush color)
         {
-            // Create a new paragraph to hold the message.
-            Paragraph paragraph = new Paragraph();
+            // 1. Determine alignment and margins based on the sender
+            bool isUser = (sender == "You");
+            TextAlignment alignment = isUser ? TextAlignment.Right : TextAlignment.Left;
+
+            // Give a side margin so long texts don't span the absolute entire width of the window
+            Thickness messageMargin = isUser ? new Thickness(60, 4, 10, 2) : new Thickness(10, 4, 60, 2);
+
+            // 2. Create a new paragraph to hold the message with alignment and margins applied
+            Paragraph paragraph = new Paragraph
+            {
+                TextAlignment = alignment,
+                Margin = messageMargin
+            };
 
             // Create and format the sender label (e.g., "Bot: ") in bold and the specified color.
             Run senderRun = new Run(sender + ": ");
@@ -43,8 +55,23 @@ namespace CyberSecurityAwarenessChatBot
                 chatDisplay.ScrollToEnd();      // Auto-scroll to show the latest character.
             }
 
-            // Add a line break after the message to separate it from future messages.
-            paragraph.Inlines.Add(new LineBreak());
+            // 3. Create a separate paragraph for the timestamp directly underneath the text
+            Thickness timeMargin = isUser ? new Thickness(60, 0, 10, 12) : new Thickness(10, 0, 60, 12);
+            Paragraph timeParagraph = new Paragraph
+            {
+                TextAlignment = alignment,
+                Margin = timeMargin,
+                FontSize = 10,                 // Make the timestamp text subtly smaller
+                Foreground = Brushes.Gray       // Muted text color for the time
+            };
+
+            // Get current time formatted (e.g., "1:45 PM")
+            string currentTime = DateTime.Now.ToString("h:mm tt");
+            timeParagraph.Inlines.Add(new Run(currentTime));
+
+            // Add timestamp block to the document
+            chatDisplay.Document.Blocks.Add(timeParagraph);
+            chatDisplay.ScrollToEnd();
         }
     }
 }
