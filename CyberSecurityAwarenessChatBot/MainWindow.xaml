@@ -8,7 +8,8 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid Background="DarkGray">
-
+        
+<!--Textbox for the ascii art logo-->
         <Border BorderBrush="Gray"
     BorderThickness="3"
     CornerRadius="15"
@@ -57,7 +58,7 @@
         </Border>
 
         <!-- CHAT DISPLAY -->
-        <!-- ROUNDED CHAT DISPLAY -->
+      
         <Border CornerRadius="10"
     BorderThickness="2"
     BorderBrush="DarkGray"
@@ -75,7 +76,7 @@
         </Border>
 
         <!-- USER INPUT -->
-        <!-- ROUNDED TEXTBOX -->
+        
         <Border CornerRadius="10"
     BorderThickness="2"
     BorderBrush="Silver"
