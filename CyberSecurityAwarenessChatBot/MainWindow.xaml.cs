@@ -255,5 +255,15 @@ namespace CyberSecurityAwarenessChatBot
             if (ChatDisplay.Document.Blocks.Contains(tempParagraph))
                 ChatDisplay.Document.Blocks.Remove(tempParagraph);
         }
+
+        private void ChatDisplay_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+
+        }
+
+        private void ChatDisplay_TextChanged_1(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+
+        }
     }
 }
