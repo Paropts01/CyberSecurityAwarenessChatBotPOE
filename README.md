@@ -73,11 +73,16 @@ The chatbot aims to raise cybersecurity awareness in an engaging, low‑pressure
  -  ProgrammingKnowledge2 (2023) Create Your First C# Windows Forms Application using Visual Studio. YouTube. Available at: https://www.youtube.com/watch?v=JSJ1JI2alJg (Accessed: Day Month Year).
     
 # Screenshots
-- <img width="1366" height="768" alt="Screenshot 2026-05-27 192310" src="https://github.com/user-attachments/assets/20151c3b-00fd-47dc-9289-a7791d60f51e" /> Programm greets he user and asks for their name
-- <img width="1366" height="768" alt="Screenshot 2026-05-27 192351" src="https://github.com/user-attachments/assets/49461923-aac2-46f4-8840-5b85e2dde978" /> Program provides available topics
-- <img width="1366" height="768" alt="Screenshot 2026-05-27 192631" src="https://github.com/user-attachments/assets/62f78206-6e32-4b0e-b2eb-02a6b1bc49d5" /> user asks for questions
-- <img width="1366" height="768" alt="Screenshot 2026-05-27 192655" src="https://github.com/user-attachments/assets/5c539183-d3da-4e45-81b6-908ba37c65f7" /> error validation for empty insert
--  <img width="1366" height="768" alt="Screenshot 2026-05-27 192910" src="https://github.com/user-attachments/assets/39da01b9-acb6-4e5e-b6ac-5882ac6dcd32" />
+-  <img width="1366" height="768" alt="Screenshot 2026-05-29 193543" src="https://github.com/user-attachments/assets/cd9bf4a7-64aa-43dd-b6d2-f6cf5b9386dd" /> Programm greets he user and asks for their name
+- <img width="1366" height="768" alt="Screenshot 2026-05-29 193822" src="https://github.com/user-attachments/assets/cee00b77-0b83-485b-a30f-418c543c920b" />
+Program provides available topics
+-  <img width="1366" height="768" alt="Screenshot 2026-05-29 194024" src="https://github.com/user-attachments/assets/edfc1fc7-44be-4d8c-8933-512f1d8b72d0" />
+user asks for questions
+-  <img width="1366" height="768" alt="Screenshot 2026-05-29 193846" src="https://github.com/user-attachments/assets/8070693d-9be9-4176-8aaa-5bf6e8d2fb3f" />
+error validation for empty insert
+-<img width="1366" height="768" alt="Screenshot 2026-05-29 194231" src="https://github.com/user-attachments/assets/cb3a15e3-ac73-4fa8-a791-b065e5442f0d" />
+
+
  
 
 
