@@ -5,8 +5,89 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CyberSecurityAwarenessChatBot"
         mc:Ignorable="d"
-        Title="QuizWindow" Height="450" Width="800">
-    <Grid>
-        
+        Title="Cybersecurity Quiz" Height="450" Width="600"
+        Background="LightGray">
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <TextBlock Grid.Row="0" Text="🛡️ Cybersecurity Quiz"
+                   FontSize="22" FontWeight="Bold"
+                   Foreground="DarkSlateBlue"
+                   HorizontalAlignment="Center"
+                   Margin="0,0,0,15"/>
+
+        <!-- Progress -->
+        <StackPanel Grid.Row="1" Orientation="Horizontal"
+                    HorizontalAlignment="Center" Margin="0,0,0,15">
+            <TextBlock Name="txtProgress" FontSize="14"
+                       Foreground="DarkSlateBlue"/>
+            <TextBlock Text=" | " FontSize="14" Foreground="Gray"/>
+            <TextBlock Name="txtScore" FontSize="14"
+                       Foreground="DarkSlateBlue"/>
+        </StackPanel>
+
+        <!-- Question Area -->
+        <Border Grid.Row="2" BorderBrush="DarkGray" BorderThickness="1"
+                CornerRadius="8" Padding="15" Background="White"
+                Margin="0,0,0,10">
+            <StackPanel>
+                <TextBlock Name="txtQuestion"
+                           FontSize="16" FontWeight="SemiBold"
+                           TextWrapping="Wrap"
+                           Margin="0,0,0,15"/>
+
+                <StackPanel Name="spOptions" Margin="0,5,0,0">
+                    <!-- Options will be added dynamically -->
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Feedback Area -->
+        <Border Grid.Row="3" BorderBrush="DarkGray" BorderThickness="1"
+                CornerRadius="8" Padding="10" Background="White"
+                Margin="0,0,0,10">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <TextBlock Name="txtFeedback"
+                           FontSize="14"
+                           TextWrapping="Wrap"
+                           Foreground="DarkSlateBlue"/>
+            </ScrollViewer>
+        </Border>
+
+        <!-- Control Buttons -->
+        <StackPanel Grid.Row="4" Orientation="Horizontal"
+                    HorizontalAlignment="Center" Margin="0,5,0,0">
+            <Button Content="Next Question"
+                    Name="btnNext"
+                    Background="DarkSlateBlue"
+                    Foreground="White"
+                    FontWeight="Bold"
+                    Width="120" Height="35"
+                    Margin="0,0,10,0"
+                    IsEnabled="False"
+                    Click="BtnNext_Click"/>
+            <Button Content="🔄 Restart Quiz"
+                    Name="btnRestart"
+                    Background="DarkOrange"
+                    Foreground="White"
+                    FontWeight="Bold"
+                    Width="120" Height="35"
+                    Click="BtnRestart_Click"/>
+            <Button Content="✖ Close"
+                    Name="btnClose"
+                    Background="DarkRed"
+                    Foreground="White"
+                    FontWeight="Bold"
+                    Width="80" Height="35"
+                    Margin="10,0,0,0"
+                    Click="BtnClose_Click"/>
+        </StackPanel>
     </Grid>
 </Window>

@@ -85,6 +85,70 @@ namespace CyberSecurityAwarenessChatBot
                     return;
                 }
 
+                // ========== NEW PART 3 NLP COMMANDS (HIGHEST PRIORITY) ==========
+                // These commands are checked before any cybersecurity-topic logic
+
+                // TASK COMMANDS
+                if (input.ToLower().Contains("add task") ||
+                    input.ToLower().Contains("new task") ||
+                    input.ToLower().Contains("create task"))
+                {
+                    await ShowTemporaryThinking(800);
+                    var taskWindow = new TaskWindow();
+                    taskWindow.Owner = this;
+                    taskWindow.ShowDialog();
+                    await TypingStyle.TypeText(ChatDisplay, "Bot", "Task window opened. You can manage your cybersecurity tasks there.", Brushes.DarkBlue);
+                    UserInput.Clear();
+                    return;
+                }
+
+                // QUIZ COMMANDS
+                if (input.ToLower().Contains("quiz") ||
+                    input.ToLower().Contains("start quiz") ||
+                    input.ToLower().Contains("take quiz"))
+                {
+                    await ShowTemporaryThinking(800);
+                    var quizWindow = new QuizWindow();
+                    quizWindow.Owner = this;
+                    quizWindow.ShowDialog();
+                    await TypingStyle.TypeText(ChatDisplay, "Bot", "Quiz completed! Keep learning to stay safe online!", Brushes.DarkBlue);
+                    UserInput.Clear();
+                    return;
+                }
+
+                // ACTIVITY LOG COMMANDS
+                if (input.ToLower().Contains("activity log") ||
+                    input.ToLower().Contains("show log") ||
+                    input.ToLower().Contains("what have you done"))
+                {
+                    await ShowTemporaryThinking(1000);
+                    string log = ActivityLogger.GetActivitySummary();
+                    await TypingStyle.TypeText(ChatDisplay, "Bot", log, Brushes.DarkBlue);
+                    UserInput.Clear();
+                    return;
+                }
+
+                // HELP COMMANDS
+                if (input.ToLower().Contains("help") ||
+                    input.ToLower().Contains("what can you do") ||
+                    input.ToLower().Contains("commands"))
+                {
+                    await ShowTemporaryThinking(800);
+                    string help = @"Here's what I can help you with:
+
+🔹 Topic Advice: Ask about passwords, scams, privacy, or phishing.
+🔹 Tips: Say 'give me a [topic] tip'.
+🔹 Tasks: Say 'add task' to manage your cybersecurity tasks.
+🔹 Quiz: Say 'start quiz' to test your knowledge.
+🔹 Activity Log: Say 'show log' to see recent actions.
+🔹 Follow-ups: Say 'tell me more' for additional information.
+
+What would you like to do?";
+                    await TypingStyle.TypeText(ChatDisplay, "Bot", help, Brushes.DarkBlue);
+                    UserInput.Clear();
+                    return;
+                }
+
                 // ========== 1. TIP DETECTION ==========
                 // If user asks for a "tip", extract the topic and give a random response
                 if (input.ToLower().Contains("tip"))
@@ -256,14 +320,69 @@ namespace CyberSecurityAwarenessChatBot
                 ChatDisplay.Document.Blocks.Remove(tempParagraph);
         }
 
+        // ========== NEW PART 3 BUTTON CLICK HANDLERS ==========
+
+        /// <summary>
+        /// Opens the Task Assistant window.
+        /// </summary>
+        private void BtnTasks_Click(object sender, RoutedEventArgs e)
+        {
+            var taskWindow = new TaskWindow();
+            taskWindow.Owner = this;
+            taskWindow.ShowDialog();
+        }
+
+        /// <summary>
+        /// Opens the Cybersecurity Quiz window.
+        /// </summary>
+        private void BtnQuiz_Click(object sender, RoutedEventArgs e)
+        {
+            var quizWindow = new QuizWindow();
+            quizWindow.Owner = this;
+            quizWindow.ShowDialog();
+        }
+
+        /// <summary>
+        /// Displays the Activity Log in a message box.
+        /// </summary>
+        private void BtnLog_Click(object sender, RoutedEventArgs e)
+        {
+            string log = ActivityLogger.GetActivitySummary();
+            MessageBox.Show(log, "Activity Log", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        /// <summary>
+        /// Displays a help menu with all available commands.
+        /// </summary>
+        private void BtnHelp_Click(object sender, RoutedEventArgs e)
+        {
+            string help = @"🎯 CyberSecurity ChatBot Help
+
+Commands you can use:
+• Type 'task' or 'add task' - Open Task Assistant
+• Type 'quiz' or 'start quiz' - Start Cybersecurity Quiz
+• Type 'log' or 'activity log' - View recent activities
+• Type 'help' - Show this help message
+• Type 'exit' - Close the application
+
+You can also:
+• Ask about cybersecurity topics (password, scam, privacy, phishing)
+• Say 'tell me more' for follow-up info
+• Share your feelings (worried, curious, frustrated)
+
+Stay safe online! 🛡️";
+            MessageBox.Show(help, "Help", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        // These empty methods are referenced in the XAML but not used.
         private void ChatDisplay_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
-
+            // Intentionally empty
         }
 
         private void ChatDisplay_TextChanged_1(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
-
+            // Intentionally empty
         }
     }
 }

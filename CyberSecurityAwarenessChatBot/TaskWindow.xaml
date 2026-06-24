@@ -5,8 +5,121 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CyberSecurityAwarenessChatBot"
         mc:Ignorable="d"
-        Title="TaskWindow" Height="450" Width="800">
-    <Grid>
-        
+        Title="Task Assistant" Height="500" Width="700"
+        Background="LightGray">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title -->
+        <TextBlock Grid.Row="0" Text="🛡️ Cybersecurity Task Assistant"
+                   FontSize="20" FontWeight="Bold"
+                   Foreground="DarkSlateBlue"
+                   HorizontalAlignment="Center"
+                   Margin="0,0,0,15"/>
+
+        <!-- Add Task Section -->
+        <Border Grid.Row="1" BorderBrush="DarkGray" BorderThickness="1"
+                CornerRadius="8" Padding="10" Background="White"
+                Margin="0,0,0,10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Row="0" Grid.ColumnSpan="3" Text="Add New Task"
+                           FontSize="14" FontWeight="Bold"
+                           Foreground="DarkSlateBlue"
+                           Margin="0,0,0,8"/>
+
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Title:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <TextBox Grid.Row="1" Grid.Column="1" Name="txtTaskTitle" Margin="0,0,10,0" Height="30"/>
+                <Button Grid.Row="1" Grid.Column="2" Content="Add" Name="btnAddTask"
+                        Background="DarkSlateBlue" Foreground="White"
+                        FontWeight="Bold" Width="60" Height="30"
+                        Click="BtnAddTask_Click"/>
+
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Description:" VerticalAlignment="Center" Margin="0,5,5,0"/>
+                <TextBox Grid.Row="2" Grid.Column="1" Name="txtTaskDescription"
+                         Margin="0,5,10,5" Height="30"/>
+
+                <TextBlock Grid.Row="3" Grid.Column="0" Text="Reminder:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <DatePicker Grid.Row="3" Grid.Column="1" Name="dpReminder"
+                            Margin="0,5,10,5" Height="30"
+                            SelectedDate="{x:Null}"/>
+                <Button Grid.Row="3" Grid.Column="2" Content="Clear"
+                        Background="Gray" Foreground="White"
+                        Width="60" Height="30" Margin="0,5,0,5"
+                        Click="BtnClearReminder_Click"/>
+            </Grid>
+        </Border>
+
+        <!-- Task List -->
+        <Border Grid.Row="2" BorderBrush="DarkGray" BorderThickness="1"
+                CornerRadius="8" Padding="5" Background="White"
+                Margin="0,0,0,10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Text="Your Tasks"
+                           FontSize="14" FontWeight="Bold"
+                           Foreground="DarkSlateBlue"
+                           Margin="5,5,0,5"/>
+
+                <ListBox Grid.Row="1" Name="lstTasks"
+                         DisplayMemberPath="Title"
+                         SelectionChanged="LstTasks_SelectionChanged"
+                         Margin="0,0,0,5">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Margin="5">
+                                <TextBlock Text="{Binding IsCompleted, Converter={StaticResource BoolToStatusConverter}}"
+                                           FontWeight="Bold" Width="20"/>
+                                <TextBlock Text="{Binding Title}" Margin="5,0,10,0"/>
+                                <TextBlock Text="{Binding ReminderDate, StringFormat='📅 {0}'}"
+                                           Foreground="DarkOrange" Margin="10,0,0,0"
+                                           Visibility="{Binding ReminderDate, Converter={StaticResource NullToVisibilityConverter}}"/>
+                                <TextBlock Text="(Overdue)" Foreground="Red"
+                                           Visibility="{Binding ReminderDate, Converter={StaticResource OverdueConverter}}"
+                                           Margin="5,0,0,0"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+        </Border>
+
+        <!-- Action Buttons -->
+        <StackPanel Grid.Row="3" Orientation="Horizontal"
+                    HorizontalAlignment="Center" Margin="0,5,0,0">
+            <Button Content="✓ Mark Complete" Name="btnComplete"
+                    Background="DarkSlateBlue" Foreground="White"
+                    FontWeight="Bold" Width="120" Height="35"
+                    Margin="0,0,10,0" Click="BtnComplete_Click"/>
+            <Button Content="🗑️ Delete" Name="btnDelete"
+                    Background="DarkRed" Foreground="White"
+                    FontWeight="Bold" Width="100" Height="35"
+                    Margin="0,0,10,0" Click="BtnDelete_Click"/>
+            <Button Content="🔄 Refresh" Name="btnRefresh"
+                    Background="Gray" Foreground="White"
+                    FontWeight="Bold" Width="100" Height="35"
+                    Click="BtnRefresh_Click"/>
+        </StackPanel>
     </Grid>
 </Window>
