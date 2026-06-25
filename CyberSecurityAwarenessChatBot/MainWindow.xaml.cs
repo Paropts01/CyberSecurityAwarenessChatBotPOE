@@ -327,9 +327,18 @@ What would you like to do?";
         /// </summary>
         private void btnTasks_Click(object sender, RoutedEventArgs e)
         {
-            // Opens the task window
-            TaskWindow taskWindow = new TaskWindow();
-            taskWindow.Show();
+            try
+            {
+                TaskWindow taskWindow = new TaskWindow();
+                taskWindow.Owner = this;   // set owner to main window
+                taskWindow.Show();
+                taskWindow.Activate();     // bring to front
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error opening TaskWindow:\n{ex.Message}\n\n{ex.StackTrace}",
+                                "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         /// <summary>

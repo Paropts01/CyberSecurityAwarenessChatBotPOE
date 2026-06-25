@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SQLite;
 using System.IO;
+using Microsoft.Data.Sqlite;
 
 namespace CyberSecurityAwarenessChatBot
 {
@@ -15,16 +15,16 @@ namespace CyberSecurityAwarenessChatBot
             string dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "CyberTasks.db");
             if (!File.Exists(dbPath))
             {
-                SQLiteConnection.CreateFile(dbPath);
+                File.Create(dbPath).Dispose();
             }
 
-            connectionString = $"Data Source={dbPath};Version=3;";
+            connectionString = $"Data Source={dbPath}";
             InitializeDatabase();
         }
 
         private void InitializeDatabase()
         {
-            using var connection = new SQLiteConnection(connectionString);
+            using var connection = new SqliteConnection(connectionString);
             connection.Open();
 
             string createTableQuery = @"
@@ -37,13 +37,13 @@ namespace CyberSecurityAwarenessChatBot
                     CreatedAt TEXT NOT NULL
                 )";
 
-            using var command = new SQLiteCommand(createTableQuery, connection);
+            using var command = new SqliteCommand(createTableQuery, connection);
             command.ExecuteNonQuery();
         }
 
-        public int AddTask(string title, string description = "", string reminderDate = null)
+        public int AddTask(string title, string description = "", string? reminderDate = null)
         {
-            using var connection = new SQLiteConnection(connectionString);
+            using var connection = new SqliteConnection(connectionString);
             connection.Open();
 
             string insertQuery = @"
@@ -51,7 +51,7 @@ namespace CyberSecurityAwarenessChatBot
                 VALUES (@Title, @Description, @ReminderDate, 0, @CreatedAt);
                 SELECT last_insert_rowid();";
 
-            using var command = new SQLiteCommand(insertQuery, connection);
+            using var command = new SqliteCommand(insertQuery, connection);
             command.Parameters.AddWithValue("@Title", title);
             command.Parameters.AddWithValue("@Description", description ?? "");
             command.Parameters.AddWithValue("@ReminderDate", reminderDate);
@@ -64,11 +64,11 @@ namespace CyberSecurityAwarenessChatBot
         {
             var tasks = new List<CyberTask>();
 
-            using var connection = new SQLiteConnection(connectionString);
+            using var connection = new SqliteConnection(connectionString);
             connection.Open();
 
             string selectQuery = "SELECT * FROM Tasks ORDER BY CreatedAt DESC";
-            using var command = new SQLiteCommand(selectQuery, connection);
+            using var command = new SqliteCommand(selectQuery, connection);
             using var reader = command.ExecuteReader();
 
             while (reader.Read())
@@ -89,11 +89,11 @@ namespace CyberSecurityAwarenessChatBot
 
         public bool MarkTaskAsComplete(int taskId)
         {
-            using var connection = new SQLiteConnection(connectionString);
+            using var connection = new SqliteConnection(connectionString);
             connection.Open();
 
             string updateQuery = "UPDATE Tasks SET IsCompleted = 1 WHERE Id = @Id";
-            using var command = new SQLiteCommand(updateQuery, connection);
+            using var command = new SqliteCommand(updateQuery, connection);
             command.Parameters.AddWithValue("@Id", taskId);
 
             return command.ExecuteNonQuery() > 0;
@@ -101,11 +101,11 @@ namespace CyberSecurityAwarenessChatBot
 
         public bool DeleteTask(int taskId)
         {
-            using var connection = new SQLiteConnection(connectionString);
+            using var connection = new SqliteConnection(connectionString);
             connection.Open();
 
             string deleteQuery = "DELETE FROM Tasks WHERE Id = @Id";
-            using var command = new SQLiteCommand(deleteQuery, connection);
+            using var command = new SqliteCommand(deleteQuery, connection);
             command.Parameters.AddWithValue("@Id", taskId);
 
             return command.ExecuteNonQuery() > 0;
@@ -113,11 +113,11 @@ namespace CyberSecurityAwarenessChatBot
 
         public CyberTask? GetTaskById(int taskId)
         {
-            using var connection = new SQLiteConnection(connectionString);
+            using var connection = new SqliteConnection(connectionString);
             connection.Open();
 
             string selectQuery = "SELECT * FROM Tasks WHERE Id = @Id";
-            using var command = new SQLiteCommand(selectQuery, connection);
+            using var command = new SqliteCommand(selectQuery, connection);
             command.Parameters.AddWithValue("@Id", taskId);
             using var reader = command.ExecuteReader();
 

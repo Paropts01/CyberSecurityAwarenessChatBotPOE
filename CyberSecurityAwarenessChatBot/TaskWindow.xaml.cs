@@ -26,7 +26,7 @@ namespace CyberSecurityAwarenessChatBot
             lstTasks.Items.Refresh();
         }
 
-        private void BtnAddTask_Click(object sender, RoutedEventArgs e)
+        private void btnAddTask_Click(object sender, RoutedEventArgs e)
         {
             string title = txtTaskTitle.Text.Trim();
             if (string.IsNullOrEmpty(title))
@@ -65,7 +65,7 @@ namespace CyberSecurityAwarenessChatBot
             selectedTask = lstTasks.SelectedItem as CyberTask;
         }
 
-        private void BtnComplete_Click(object sender, RoutedEventArgs e)
+        private void btnComplete_Click(object sender, RoutedEventArgs e)
         {
             if (selectedTask == null)
             {
@@ -101,7 +101,7 @@ namespace CyberSecurityAwarenessChatBot
             }
         }
 
-        private void BtnDelete_Click(object sender, RoutedEventArgs e)
+        private void btnDelete_Click(object sender, RoutedEventArgs e)
         {
             if (selectedTask == null)
             {
@@ -131,14 +131,19 @@ namespace CyberSecurityAwarenessChatBot
             }
         }
 
-        private void BtnRefresh_Click(object sender, RoutedEventArgs e)
+        private void btnRefresh_Click(object sender, RoutedEventArgs e)
         {
             LoadTasks();
         }
 
-        private void BtnClearReminder_Click(object sender, RoutedEventArgs e)
+        private void btnClearReminder_Click(object sender, RoutedEventArgs e)
         {
             dpReminder.SelectedDate = null;
+        }
+
+        private void btnBack_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
         }
     }
 

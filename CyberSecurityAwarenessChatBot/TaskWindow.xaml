@@ -1,19 +1,8 @@
 ﻿<!--
     TaskWindow.xaml
 
-    Modern Task Assistant Window
-
-    Features:
-    • Add Tasks
-    • Clear Reminder Date
-    • Mark Tasks Complete
-    • Delete Tasks
-    • Refresh Tasks
-
-    NOTE:
-    All original control names and event handlers
-    have been preserved for compatibility with
-    the existing code-behind.
+    Modern Task Assistant Window – cleaned‑up layout
+    using a Grid with rows and columns for consistent spacing.
 -->
 
 <Window x:Class="CyberSecurityAwarenessChatBot.TaskWindow"
@@ -24,29 +13,26 @@
         xmlns:local="clr-namespace:CyberSecurityAwarenessChatBot"
         mc:Ignorable="d"
         Title="Task Assistant"
-        Height="500"
+        Height="550"
         Width="800"
         ResizeMode="NoResize"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterOwner">
 
-    <!-- =========================================================
-         RESOURCES
-         ========================================================= -->
     <Window.Resources>
-
-        <!-- Declared Value Converters Linked to the C# Code -->
+        <!-- Converters -->
         <local:BoolToStatusConverter x:Key="BoolToStatusConverter"/>
         <local:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
         <local:OverdueConverter x:Key="OverdueConverter"/>
 
-        <!-- Rounded Modern Button Style -->
+        <!-- Rounded Button Style (matches main window) -->
         <Style x:Key="RoundedButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="Lavender"/>
             <Setter Property="Foreground" Value="DarkSlateBlue"/>
             <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Height" Value="40"/>
+            <Setter Property="Height" Value="35"/>
+            <Setter Property="Padding" Value="15,5"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -62,91 +48,235 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
-
     </Window.Resources>
 
     <!-- =========================================================
-         MAIN GRID
+         MAIN GRID – 3 rows, 1 column
          ========================================================= -->
     <Grid>
         <Grid.Background>
             <ImageBrush ImageSource="/pexels-codioful-7134987.jpg" Stretch="UniformToFill"/>
         </Grid.Background>
 
-        <TextBlock Text="Task Assistant" FontSize="52" FontWeight="Bold" Foreground="DarkSlateBlue" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,5,0,0"/>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Title -->
+            <RowDefinition Height="Auto"/>
+            <!-- Input area -->
+            <RowDefinition Height="*"/>
+            <!-- Task list -->
+            <RowDefinition Height="Auto"/>
+            <!-- Action buttons -->
+        </Grid.RowDefinitions>
 
-        <!-- TASK INPUT PANEL -->
-        <Border CornerRadius="15" Margin="30,75,150,197">
+        <!-- =====================================================
+             TITLE
+             ===================================================== -->
+        <TextBlock Grid.Row="0"
+                   Text="Task Assistant"
+                   FontSize="42"
+                   FontWeight="Bold"
+                   Foreground="DarkSlateBlue"
+                   HorizontalAlignment="Center"
+                   Margin="0,15,0,10"/>
+
+        <!-- =====================================================
+             INPUT AREA
+             ===================================================== -->
+        <Border Grid.Row="1"
+                CornerRadius="15"
+                Margin="30,0,30,15"
+                Padding="20,15">
             <Border.Background>
                 <SolidColorBrush Color="DarkSlateBlue" Opacity="0.18"/>
             </Border.Background>
 
-            <StackPanel Margin="30">
-                <Grid Margin="0,10">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="100"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Text="Title" Grid.Column="0" FontSize="16" FontWeight="Bold" Foreground="DarkSlateBlue" Margin="0,-6,45,15"/>
-                    <TextBox Name="txtTaskTitle" Height="30" Margin="10,-15,0,15" Grid.Column="1"/>
-                </Grid>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-                <Grid Margin="0,5">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="100"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Text="Description" Grid.Column="0" FontSize="16" FontWeight="Bold" Foreground="DarkSlateBlue" VerticalAlignment="Top" Margin="0,-17,0,0"/>
-                    <TextBox Name="txtTaskDescription" Grid.Column="1" Height="30" Margin="10,-21,0,21"/>
-                </Grid>
+                <!-- Title -->
+                <TextBlock Grid.Row="0" Grid.Column="0"
+                           Text="Title"
+                           FontSize="16"
+                           FontWeight="Bold"
+                           Foreground="DarkSlateBlue"
+                           VerticalAlignment="Center"
+                           Margin="0,0,10,5"/>
+                <TextBox Grid.Row="0" Grid.Column="1"
+                         Name="txtTaskTitle"
+                         Height="30"
+                         Margin="0,0,20,5"
+                         VerticalContentAlignment="Center"
+                         Padding="8,0"/>
 
-                <Grid Margin="0,5">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="18.076"/>
-                        <ColumnDefinition Width="81.924"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Text="Date" Grid.Column="0" FontSize="16" FontWeight="Bold" Foreground="DarkSlateBlue" VerticalAlignment="Top" Margin="0,-15,0,0" Grid.ColumnSpan="2"/>
-                    <DatePicker Name="dpReminder" SelectedDate="{x:Null}" Margin="8,-21,-8,-5" Grid.Column="2"/>
-                </Grid>
+                <!-- Description -->
+                <TextBlock Grid.Row="1" Grid.Column="0"
+                           Text="Description"
+                           FontSize="16"
+                           FontWeight="Bold"
+                           Foreground="DarkSlateBlue"
+                           VerticalAlignment="Center"
+                           Margin="0,0,10,5"/>
+                <TextBox Grid.Row="1" Grid.Column="1"
+                         Name="txtTaskDescription"
+                         Height="30"
+                         Margin="0,0,20,5"
+                         VerticalContentAlignment="Center"
+                         Padding="8,0"/>
 
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,15,0,0">
-                    <Button Content="ADD" Name="btnAddTask" FontSize="16" Width="95" Margin="0,0,10,0" Style="{StaticResource RoundedButtonStyle}" Click="BtnAddTask_Click" Height="34"/>
-                    <Button Content="CLEAR" FontSize="16" FontWeight="Bold" x:Name="btnClearReminder" Width="95" Style="{StaticResource RoundedButtonStyle}" Click="BtnClearReminder_Click" Height="34"/>
+                <!-- Date -->
+                <TextBlock Grid.Row="2" Grid.Column="0"
+                           Text="Date"
+                           FontSize="16"
+                           FontWeight="Bold"
+                           Foreground="DarkSlateBlue"
+                           VerticalAlignment="Center"
+                           Margin="0,0,10,0"/>
+                <DatePicker Grid.Row="2" Grid.Column="1"
+                            Name="dpReminder"
+                            Height="30"
+                            Margin="0,0,20,0"
+                            SelectedDate="{x:Null}"/>
+
+                <!-- Add & Clear Reminder Buttons -->
+                <StackPanel Grid.Row="0" Grid.Column="2" Grid.RowSpan="3"
+                            Orientation="Vertical"
+                            VerticalAlignment="Center"
+                            Margin="10,0,0,0">
+                    <Button Name="btnAddTask"
+                            Content="ADD"
+                            Style="{StaticResource RoundedButtonStyle}"
+                            Width="90"
+                            Margin="0,0,0,8"
+                            Click="btnAddTask_Click"/>
+                    <Button Name="btnClearReminder"
+                            Content="CLEAR DATE"
+                            Style="{StaticResource RoundedButtonStyle}"
+                            Width="90"
+                            Click="btnClearReminder_Click"/>
                 </StackPanel>
-            </StackPanel>
+            </Grid>
         </Border>
 
-        <TextBlock Text="Your Tasks" FontSize="18" FontWeight="Bold" Foreground="DarkSlateBlue" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="296,292,0,0"/>
+        <!-- =====================================================
+             TASK LIST
+             ===================================================== -->
+        <Border Grid.Row="2"
+                CornerRadius="15"
+                Margin="30,0,30,10"
+                Padding="0">
+            <Border.Background>
+                <SolidColorBrush Color="DarkSlateBlue" Opacity="0.18"/>
+            </Border.Background>
 
-        <!-- TASK LIST VIEW WITH VALUE CONVERTERS IMPLEMENTED -->
-        <ListBox Name="lstTasks" Margin="30,320,30,20" SelectionChanged="LstTasks_SelectionChanged">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <Grid Margin="5">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="30"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
+            <ListBox Name="lstTasks"
+                     SelectionChanged="LstTasks_SelectionChanged"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     Padding="10"
+                     Foreground="White">
 
-                        <!-- Status Icon Converter -->
-                        <TextBlock Text="{Binding IsCompleted, Converter={StaticResource BoolToStatusConverter}}" 
-                                   Grid.Column="0" FontSize="16" VerticalAlignment="Center"/>
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="Padding" Value="6"/>
+                        <Setter Property="Margin" Value="0,2"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#25FFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#40FFFFFF"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListBox.ItemContainerStyle>
 
-                        <StackPanel Grid.Column="1" Margin="5,0,0,0">
-                            <!-- Overdue Color Brush Converter -->
-                            <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="Bold" 
-                                       Foreground="{Binding ReminderDate, Converter={StaticResource OverdueConverter}}"/>
-                            <TextBlock Text="{Binding Description}" FontSize="12" Foreground="Gray"/>
-                        </StackPanel>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Border CornerRadius="10" Padding="8" Margin="2">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="30"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
 
-                        <!-- Date Visibility Converter -->
-                        <TextBlock Text="{Binding ReminderDate}" Grid.Column="2" FontSize="12" VerticalAlignment="Center"
-                                   Visibility="{Binding ReminderDate, Converter={StaticResource NullToVisibilityConverter}}"/>
-                    </Grid>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+                                <!-- Status Icon -->
+                                <TextBlock Grid.Column="0"
+                                           FontSize="16"
+                                           VerticalAlignment="Center"
+                                           Foreground="White"
+                                           Text="{Binding IsCompleted, Converter={StaticResource BoolToStatusConverter}}"/>
+
+                                <!-- Task Details -->
+                                <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                    <TextBlock Text="{Binding Title}"
+                                               FontSize="15"
+                                               FontWeight="Bold"
+                                               Foreground="{Binding ReminderDate, Converter={StaticResource OverdueConverter}}"/>
+                                    <TextBlock Text="{Binding Description}"
+                                               FontSize="12"
+                                               Foreground="White"
+                                               TextWrapping="Wrap"/>
+                                </StackPanel>
+
+                                <!-- Reminder Date -->
+                                <TextBlock Grid.Column="2"
+                                           FontSize="12"
+                                           Foreground="White"
+                                           VerticalAlignment="Center"
+                                           Text="{Binding ReminderDate}"
+                                           Visibility="{Binding ReminderDate, Converter={StaticResource NullToVisibilityConverter}}"/>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Border>
+
+        <!-- =====================================================
+             ACTION BUTTONS (Refresh, Complete, Delete)
+             ===================================================== -->
+        <StackPanel Grid.Row="3"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Center"
+                    Margin="0,0,0,15">
+            <Button Name="btnRefresh"
+                    Content="Refresh"
+                    Style="{StaticResource RoundedButtonStyle}"
+                    Width="100"
+                    Margin="0,0,15,0"
+                    Click="btnRefresh_Click"/>
+            <Button Name="btnComplete"
+                    Content="Complete"
+                    Style="{StaticResource RoundedButtonStyle}"
+                    Width="100"
+                    Margin="0,0,15,0"
+                    Click="btnComplete_Click"/>
+            <Button Name="btnDelete"
+                    Content="Delete"
+                    Style="{StaticResource RoundedButtonStyle}"
+                    Width="100"
+                    Click="btnDelete_Click"/>
+            <Button Name="btnBack"
+        Content="Back"
+        Style="{StaticResource RoundedButtonStyle}"
+        Width="100"
+        Margin="15,0,0,0"
+        Click="btnBack_Click"/>
+        </StackPanel>
     </Grid>
 </Window>
