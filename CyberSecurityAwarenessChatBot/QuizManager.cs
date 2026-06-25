@@ -21,6 +21,7 @@ namespace CyberSecurityAwarenessChatBot
         {
             questions = new List<QuizQuestion>
             {
+                // ========== MULTIPLE CHOICE QUESTIONS ==========
                 new QuizQuestion
                 {
                     Question = "What is a strong password practice?",
@@ -91,19 +92,28 @@ namespace CyberSecurityAwarenessChatBot
                     CorrectAnswerIndex = 1,
                     Explanation = "Social engineering exploits human psychology to gain access to sensitive information."
                 },
+
+                // ========== TRUE/FALSE QUESTIONS (added for variety) ==========
                 new QuizQuestion
                 {
-                    Question = "What is the best practice for creating a secure password?",
-                    Options = new List<string> { "Use a dictionary word", "Use a phrase with mixed case and symbols", "Use your birthdate", "Use the same password everywhere" },
-                    CorrectAnswerIndex = 1,
-                    Explanation = "A secure password should be a phrase with mixed case, numbers, and symbols."
+                    Question = "True or False: Using the same password for multiple accounts is safe.",
+                    Options = new List<string> { "True", "False" },
+                    CorrectAnswerIndex = 1, // False
+                    Explanation = "Reusing passwords is dangerous – if one account is breached, all others become vulnerable."
                 },
                 new QuizQuestion
                 {
-                    Question = "What is the main purpose of antivirus software?",
-                    Options = new List<string> { "To speed up your computer", "To protect against malware and viruses", "To manage passwords", "To create backups" },
-                    CorrectAnswerIndex = 1,
-                    Explanation = "Antivirus software is designed to detect and remove malicious software from your computer."
+                    Question = "True or False: You should always click on links in emails from your bank to verify your account.",
+                    Options = new List<string> { "True", "False" },
+                    CorrectAnswerIndex = 1, // False
+                    Explanation = "Never click links in unsolicited emails. Always type the bank's official URL directly into your browser."
+                },
+                new QuizQuestion
+                {
+                    Question = "True or False: Antivirus software is the only protection you need against cyber threats.",
+                    Options = new List<string> { "True", "False" },
+                    CorrectAnswerIndex = 1, // False
+                    Explanation = "Antivirus is important, but you also need strong passwords, 2FA, safe browsing habits, and regular updates."
                 }
             };
         }
@@ -169,11 +179,11 @@ namespace CyberSecurityAwarenessChatBot
             int scorePercent = (score * 100) / total;
 
             if (scorePercent >= 80)
-                return $"🎉 Great job! You scored {score}/{total} ({scorePercent}%)! You're a cybersecurity pro!";
+                return $" Great job! You scored {score}/{total} ({scorePercent}%)! You're a cybersecurity pro!";
             else if (scorePercent >= 60)
-                return $"👍 Good effort! You scored {score}/{total} ({scorePercent}%). Keep learning to become a cybersecurity expert!";
+                return $" Good effort! You scored {score}/{total} ({scorePercent}%). Keep learning to become a cybersecurity expert!";
             else
-                return $"📚 Keep learning! You scored {score}/{total} ({scorePercent}%). Review the topics we've discussed to improve your knowledge!";
+                return $" Keep learning! You scored {score}/{total} ({scorePercent}%). Review the topics we've discussed to improve your knowledge!";
         }
     }
 

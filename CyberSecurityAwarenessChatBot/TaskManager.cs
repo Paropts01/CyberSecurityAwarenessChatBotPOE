@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using Microsoft.Data.Sqlite;
+using MySql.Data.MySqlClient;
 
 namespace CyberSecurityAwarenessChatBot
 {
@@ -11,76 +10,70 @@ namespace CyberSecurityAwarenessChatBot
 
         public TaskManager()
         {
-            // Create the database file if it doesn't exist
-            string dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "CyberTasks.db");
-            if (!File.Exists(dbPath))
-            {
-                File.Create(dbPath).Dispose();
-            }
-
-            connectionString = $"Data Source={dbPath}";
+            // Replace with your MySQL connection details
+            connectionString = "Server=localhost;Database=CyberTasks;Uid=root;Pwd=yourpassword;";
             InitializeDatabase();
         }
 
         private void InitializeDatabase()
         {
-            using var connection = new SqliteConnection(connectionString);
-            connection.Open();
+            using var conn = new MySqlConnection(connectionString);
+            conn.Open();
 
             string createTableQuery = @"
                 CREATE TABLE IF NOT EXISTS Tasks (
-                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    Title TEXT NOT NULL,
+                    Id INT AUTO_INCREMENT PRIMARY KEY,
+                    Title VARCHAR(255) NOT NULL,
                     Description TEXT,
-                    ReminderDate TEXT,
-                    IsCompleted INTEGER NOT NULL DEFAULT 0,
-                    CreatedAt TEXT NOT NULL
+                    ReminderDate DATE,
+                    IsCompleted BOOLEAN NOT NULL DEFAULT FALSE,
+                    CreatedAt DATETIME NOT NULL
                 )";
 
-            using var command = new SqliteCommand(createTableQuery, connection);
-            command.ExecuteNonQuery();
+            using var cmd = new MySqlCommand(createTableQuery, conn);
+            cmd.ExecuteNonQuery();
         }
 
         public int AddTask(string title, string description = "", string? reminderDate = null)
         {
-            using var connection = new SqliteConnection(connectionString);
-            connection.Open();
+            using var conn = new MySqlConnection(connectionString);
+            conn.Open();
 
             string insertQuery = @"
                 INSERT INTO Tasks (Title, Description, ReminderDate, IsCompleted, CreatedAt)
-                VALUES (@Title, @Description, @ReminderDate, 0, @CreatedAt);
-                SELECT last_insert_rowid();";
+                VALUES (@Title, @Description, @ReminderDate, FALSE, @CreatedAt);
+                SELECT LAST_INSERT_ID();";
 
-            using var command = new SqliteCommand(insertQuery, connection);
-            command.Parameters.AddWithValue("@Title", title);
-            command.Parameters.AddWithValue("@Description", description ?? "");
-            command.Parameters.AddWithValue("@ReminderDate", reminderDate);
-            command.Parameters.AddWithValue("@CreatedAt", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+            using var cmd = new MySqlCommand(insertQuery, conn);
+            cmd.Parameters.AddWithValue("@Title", title);
+            cmd.Parameters.AddWithValue("@Description", description ?? "");
+            cmd.Parameters.AddWithValue("@ReminderDate", string.IsNullOrEmpty(reminderDate) ? (object)DBNull.Value : reminderDate);
+            cmd.Parameters.AddWithValue("@CreatedAt", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
 
-            return Convert.ToInt32(command.ExecuteScalar());
+            return Convert.ToInt32(cmd.ExecuteScalar());
         }
 
         public List<CyberTask> GetAllTasks()
         {
             var tasks = new List<CyberTask>();
 
-            using var connection = new SqliteConnection(connectionString);
-            connection.Open();
+            using var conn = new MySqlConnection(connectionString);
+            conn.Open();
 
             string selectQuery = "SELECT * FROM Tasks ORDER BY CreatedAt DESC";
-            using var command = new SqliteCommand(selectQuery, connection);
-            using var reader = command.ExecuteReader();
+            using var cmd = new MySqlCommand(selectQuery, conn);
+            using var reader = cmd.ExecuteReader();
 
             while (reader.Read())
             {
                 tasks.Add(new CyberTask
                 {
-                    Id = Convert.ToInt32(reader["Id"]),
-                    Title = reader["Title"].ToString(),
-                    Description = reader["Description"].ToString(),
-                    ReminderDate = reader["ReminderDate"] != DBNull.Value ? reader["ReminderDate"].ToString() : null,
-                    IsCompleted = Convert.ToBoolean(reader["IsCompleted"]),
-                    CreatedAt = reader["CreatedAt"].ToString()
+                    Id = reader.GetInt32("Id"),
+                    Title = reader.GetString("Title"),
+                    Description = reader.IsDBNull(reader.GetOrdinal("Description")) ? "" : reader.GetString("Description"),
+                    ReminderDate = reader.IsDBNull(reader.GetOrdinal("ReminderDate")) ? null : reader.GetDateTime("ReminderDate").ToString("yyyy-MM-dd"),
+                    IsCompleted = reader.GetBoolean("IsCompleted"),
+                    CreatedAt = reader.GetDateTime("CreatedAt").ToString("yyyy-MM-dd HH:mm:ss")
                 });
             }
 
@@ -89,52 +82,82 @@ namespace CyberSecurityAwarenessChatBot
 
         public bool MarkTaskAsComplete(int taskId)
         {
-            using var connection = new SqliteConnection(connectionString);
-            connection.Open();
+            using var conn = new MySqlConnection(connectionString);
+            conn.Open();
 
-            string updateQuery = "UPDATE Tasks SET IsCompleted = 1 WHERE Id = @Id";
-            using var command = new SqliteCommand(updateQuery, connection);
-            command.Parameters.AddWithValue("@Id", taskId);
+            string updateQuery = "UPDATE Tasks SET IsCompleted = TRUE WHERE Id = @Id";
+            using var cmd = new MySqlCommand(updateQuery, conn);
+            cmd.Parameters.AddWithValue("@Id", taskId);
 
-            return command.ExecuteNonQuery() > 0;
+            return cmd.ExecuteNonQuery() > 0;
         }
 
         public bool DeleteTask(int taskId)
         {
-            using var connection = new SqliteConnection(connectionString);
-            connection.Open();
+            using var conn = new MySqlConnection(connectionString);
+            conn.Open();
 
             string deleteQuery = "DELETE FROM Tasks WHERE Id = @Id";
-            using var command = new SqliteCommand(deleteQuery, connection);
-            command.Parameters.AddWithValue("@Id", taskId);
+            using var cmd = new MySqlCommand(deleteQuery, conn);
+            cmd.Parameters.AddWithValue("@Id", taskId);
 
-            return command.ExecuteNonQuery() > 0;
+            return cmd.ExecuteNonQuery() > 0;
         }
 
         public CyberTask? GetTaskById(int taskId)
         {
-            using var connection = new SqliteConnection(connectionString);
-            connection.Open();
+            using var conn = new MySqlConnection(connectionString);
+            conn.Open();
 
             string selectQuery = "SELECT * FROM Tasks WHERE Id = @Id";
-            using var command = new SqliteCommand(selectQuery, connection);
-            command.Parameters.AddWithValue("@Id", taskId);
-            using var reader = command.ExecuteReader();
+            using var cmd = new MySqlCommand(selectQuery, conn);
+            cmd.Parameters.AddWithValue("@Id", taskId);
+            using var reader = cmd.ExecuteReader();
 
             if (reader.Read())
             {
                 return new CyberTask
                 {
-                    Id = Convert.ToInt32(reader["Id"]),
-                    Title = reader["Title"].ToString(),
-                    Description = reader["Description"].ToString(),
-                    ReminderDate = reader["ReminderDate"] != DBNull.Value ? reader["ReminderDate"].ToString() : null,
-                    IsCompleted = Convert.ToBoolean(reader["IsCompleted"]),
-                    CreatedAt = reader["CreatedAt"].ToString()
+                    Id = reader.GetInt32("Id"),
+                    Title = reader.GetString("Title"),
+                    Description = reader.IsDBNull(reader.GetOrdinal("Description")) ? "" : reader.GetString("Description"),
+                    ReminderDate = reader.IsDBNull(reader.GetOrdinal("ReminderDate")) ? null : reader.GetDateTime("ReminderDate").ToString("yyyy-MM-dd"),
+                    IsCompleted = reader.GetBoolean("IsCompleted"),
+                    CreatedAt = reader.GetDateTime("CreatedAt").ToString("yyyy-MM-dd HH:mm:ss")
                 };
             }
 
             return null;
+        }
+
+        // Get tasks whose reminder date is today (for proactive notifications)
+        public List<CyberTask> GetTasksWithReminderToday()
+        {
+            var tasks = new List<CyberTask>();
+            string today = DateTime.Today.ToString("yyyy-MM-dd");
+
+            using var conn = new MySqlConnection(connectionString);
+            conn.Open();
+
+            string query = "SELECT * FROM Tasks WHERE ReminderDate = @Today AND IsCompleted = FALSE";
+            using var cmd = new MySqlCommand(query, conn);
+            cmd.Parameters.AddWithValue("@Today", today);
+            using var reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                tasks.Add(new CyberTask
+                {
+                    Id = reader.GetInt32("Id"),
+                    Title = reader.GetString("Title"),
+                    Description = reader.IsDBNull(reader.GetOrdinal("Description")) ? "" : reader.GetString("Description"),
+                    ReminderDate = reader.IsDBNull(reader.GetOrdinal("ReminderDate")) ? null : reader.GetDateTime("ReminderDate").ToString("yyyy-MM-dd"),
+                    IsCompleted = reader.GetBoolean("IsCompleted"),
+                    CreatedAt = reader.GetDateTime("CreatedAt").ToString("yyyy-MM-dd HH:mm:ss")
+                });
+            }
+
+            return tasks;
         }
     }
 

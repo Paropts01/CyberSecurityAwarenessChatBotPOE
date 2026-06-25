@@ -42,6 +42,7 @@ namespace CyberSecurityAwarenessChatBot
             int id = taskManager.AddTask(title, description, reminderDate);
             if (id > 0)
             {
+                // --- Activity Log: Task added ---
                 ActivityLogger.AddActivity($"Task added: '{title}'" +
                     (reminderDate != null ? $" (Reminder: {reminderDate})" : ""));
 
@@ -88,6 +89,7 @@ namespace CyberSecurityAwarenessChatBot
             {
                 if (taskManager.MarkTaskAsComplete(selectedTask.Id))
                 {
+                    // --- Activity Log: Task completed ---
                     ActivityLogger.AddActivity($"Task completed: '{selectedTask.Title}'");
                     LoadTasks();
                     MessageBox.Show("Task marked as complete!", "Success",
@@ -117,6 +119,7 @@ namespace CyberSecurityAwarenessChatBot
             {
                 if (taskManager.DeleteTask(selectedTask.Id))
                 {
+                    // --- Activity Log: Task deleted ---
                     ActivityLogger.AddActivity($"Task deleted: '{selectedTask.Title}'");
                     selectedTask = null;
                     LoadTasks();

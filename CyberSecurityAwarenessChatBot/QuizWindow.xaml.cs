@@ -129,6 +129,7 @@ namespace CyberSecurityAwarenessChatBot
             txtProgress.Text = $"Completed! Total Questions: {quizManager.GetTotalQuestions()}";
             txtScore.Text = $"Final Score: {quizManager.GetScore()}/{quizManager.GetTotalQuestions()}";
 
+            // --- Activity Log: Quiz completed with score ---
             ActivityLogger.AddActivity($"Quiz completed - Score: {quizManager.GetScore()}/{quizManager.GetTotalQuestions()}");
         }
 
@@ -175,5 +176,4 @@ namespace CyberSecurityAwarenessChatBot
             return -1;
         }
     }
-} 
-
+}

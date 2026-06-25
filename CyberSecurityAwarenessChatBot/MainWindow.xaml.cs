@@ -1,5 +1,5 @@
-﻿// MainWindow.xaml.cs - Code-behind for the CyberSecurity Chatbot UI
-// Handles user input, chatbot responses, and UI interactions
+﻿// MainWindow.xaml.cs - Full updated code with conversational task creation, proactive reminders,
+// and enhanced NLP to handle "remind me to..." and "set a reminder for..." commands.
 
 using System;
 using System.Threading.Tasks;
@@ -7,51 +7,83 @@ using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Timers;
 
 namespace CyberSecurityAwarenessChatBot
 {
     public partial class MainWindow : Window
     {
         // Private fields for the chatbot's core components
-        private Chatbot chatbot;                       // Manages user name and favorite topic
-        private CyberSecurityChatBot cyberBot;         // Provides keyword-based cybersecurity responses
-        private RandomResponseManager randomResponse;  // Gives random tips on specific topics
-        private ConversationManager conversationManager; // Tracks current topic and follow-up requests
-        private bool awaitingName = true;              // Flag to indicate if we're still waiting for user's name
+        private Chatbot chatbot;
+        private CyberSecurityChatBot cyberBot;
+        private RandomResponseManager randomResponse;
+        private ConversationManager conversationManager;
+        private bool awaitingName = true;
 
-        // Constructor: initializes components and sets up the chat
+        // Task management fields
+        private TaskManager taskManager;
+        private enum TaskCreationState { None, AwaitingTitle, AwaitingDescription, AwaitingReminder }
+        private TaskCreationState _taskState = TaskCreationState.None;
+        private string _pendingTaskTitle = "";
+        private string _pendingTaskDescription = "";
+
+        // Timer for checking reminders periodically
+        private System.Timers.Timer _reminderTimer;
+
+        // Constructor
         public MainWindow()
         {
             InitializeComponent();
 
-            // Set up the chat display document with comfortable line height
             ChatDisplay.Document = new FlowDocument();
             ChatDisplay.Document.LineHeight = 1.2;
 
-            // Instantiate helper classes
             chatbot = new Chatbot();
             cyberBot = new CyberSecurityChatBot();
             randomResponse = new RandomResponseManager();
             conversationManager = new ConversationManager();
+            taskManager = new TaskManager(); // MySQL-backed
 
-            // Play a greeting sound and display welcome message
             AudioPlayer.PlayGreeting();
             DisplayWelcomeMessage();
+
+            // Set up the reminder timer (checks every 60 seconds for demo purposes)
+            _reminderTimer = new System.Timers.Timer(60000);
+            _reminderTimer.Elapsed += CheckReminders;
+            _reminderTimer.AutoReset = true;
+            _reminderTimer.Start();
+
+            // Check reminders immediately on startup
+            CheckReminders(null, null);
         }
 
-        // Displays the initial welcome message with typing animation effect
         private async void DisplayWelcomeMessage()
         {
             await TypingStyle.TypeText(ChatDisplay, "Bot", "Hello! Welcome to the Cyber Security Awareness Chat Bot!", Brushes.DarkBlue);
             await TypingStyle.TypeText(ChatDisplay, "Bot", "What is your name?", Brushes.DarkBlue);
         }
 
-        // Handles the Send button click and Enter key press (via UserInput_KeyDown)
+        private async void CheckReminders(object sender, ElapsedEventArgs e)
+        {
+            var dueTasks = taskManager.GetTasksWithReminderToday();
+            if (dueTasks.Count > 0)
+            {
+                await Dispatcher.InvokeAsync(async () =>
+                {
+                    foreach (var task in dueTasks)
+                    {
+                        await TypingStyle.TypeText(ChatDisplay, "Bot",
+                            $"🔔 Reminder: Task '{task.Title}' is due today! {(string.IsNullOrEmpty(task.Description) ? "" : $"Details: {task.Description}")}",
+                            Brushes.DarkRed);
+                    }
+                });
+            }
+        }
+
         private async void SendButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                // Get and validate user input
                 string input = UserInput.Text.Trim();
                 if (!cyberBot.ValidateInput(input))
                 {
@@ -59,10 +91,9 @@ namespace CyberSecurityAwarenessChatBot
                     return;
                 }
 
-                // Display user's message in the chat
                 await TypingStyle.TypeText(ChatDisplay, "You", input, Brushes.DarkSlateBlue);
 
-                // Exit command handling
+                // Exit command
                 if (input.ToLower() == "exit" || input.ToLower() == "quit" || input.ToLower() == "goodbye")
                 {
                     string userName = chatbot.GetUserName() ?? "friend";
@@ -72,7 +103,7 @@ namespace CyberSecurityAwarenessChatBot
                     return;
                 }
 
-                // First interaction: get and store user's name
+                // First interaction: get name
                 if (awaitingName)
                 {
                     chatbot.SetUserName(input);
@@ -85,27 +116,87 @@ namespace CyberSecurityAwarenessChatBot
                     return;
                 }
 
-                // ========== NEW PART 3 NLP COMMANDS (HIGHEST PRIORITY) ==========
-                // These commands are checked before any cybersecurity-topic logic
-
-                // TASK COMMANDS
-                if (input.ToLower().Contains("add task") ||
-                    input.ToLower().Contains("new task") ||
-                    input.ToLower().Contains("create task"))
+                // ========== TASK CREATION STATE MACHINE ==========
+                if (_taskState != TaskCreationState.None)
                 {
-                    await ShowTemporaryThinking(800);
-                    var taskWindow = new TaskWindow();
-                    taskWindow.Owner = this;
-                    taskWindow.ShowDialog();
-                    await TypingStyle.TypeText(ChatDisplay, "Bot", "Task window opened. You can manage your cybersecurity tasks there.", Brushes.DarkBlue);
+                    await HandleTaskCreationFlow(input);
+                    UserInput.Clear();
+                    return;
+                }
+
+                // ========== NLP COMMANDS (HIGHEST PRIORITY) ==========
+
+                // 1. TASK / REMINDER COMMANDS
+                // Detect "remind me to ..." or "set a reminder for ..." and treat as task creation
+                string lowerInput = input.ToLower();
+                if (lowerInput.Contains("remind me to") || lowerInput.Contains("set a reminder"))
+                {
+                    // Extract the task title from the input
+                    string title = "";
+                    if (lowerInput.Contains("remind me to"))
+                    {
+                        int idx = lowerInput.IndexOf("remind me to") + "remind me to".Length;
+                        if (idx < input.Length)
+                            title = input.Substring(idx).Trim();
+                    }
+                    else if (lowerInput.Contains("set a reminder"))
+                    {
+                        int idx = lowerInput.IndexOf("set a reminder") + "set a reminder".Length;
+                        if (idx < input.Length)
+                            title = input.Substring(idx).Trim();
+                    }
+
+                    if (!string.IsNullOrEmpty(title))
+                    {
+                        _pendingTaskTitle = title;
+                        _taskState = TaskCreationState.AwaitingDescription;
+                        await TypingStyle.TypeText(ChatDisplay, "Bot",
+                            $"I'll create a task titled '{title}'. Please provide a short description (or type 'skip').",
+                            Brushes.DarkBlue);
+                        UserInput.Clear();
+                        return;
+                    }
+                    else
+                    {
+                        // Fallback: start generic task creation
+                        _taskState = TaskCreationState.AwaitingTitle;
+                        await TypingStyle.TypeText(ChatDisplay, "Bot",
+                            "What task would you like to set a reminder for? Please enter a title.",
+                            Brushes.DarkBlue);
+                        UserInput.Clear();
+                        return;
+                    }
+                }
+
+                // Standard "add task" commands (already handled)
+                if (lowerInput.Contains("add task") || lowerInput.Contains("new task") || lowerInput.Contains("create task"))
+                {
+                    int colonIdx = input.IndexOf(':');
+                    if (colonIdx > 0 && colonIdx < input.Length - 1)
+                    {
+                        string title = input.Substring(colonIdx + 1).Trim();
+                        if (!string.IsNullOrEmpty(title))
+                        {
+                            _pendingTaskTitle = title;
+                            _taskState = TaskCreationState.AwaitingDescription;
+                            await TypingStyle.TypeText(ChatDisplay, "Bot",
+                                $"Got it! I'll create a task titled '{title}'. Please provide a short description (or type 'skip').",
+                                Brushes.DarkBlue);
+                            UserInput.Clear();
+                            return;
+                        }
+                    }
+
+                    _taskState = TaskCreationState.AwaitingTitle;
+                    await TypingStyle.TypeText(ChatDisplay, "Bot",
+                        "Let's add a cybersecurity task. What is the title of the task?",
+                        Brushes.DarkBlue);
                     UserInput.Clear();
                     return;
                 }
 
                 // QUIZ COMMANDS
-                if (input.ToLower().Contains("quiz") ||
-                    input.ToLower().Contains("start quiz") ||
-                    input.ToLower().Contains("take quiz"))
+                if (lowerInput.Contains("quiz") || lowerInput.Contains("start quiz") || lowerInput.Contains("take quiz"))
                 {
                     await ShowTemporaryThinking(800);
                     var quizWindow = new QuizWindow();
@@ -117,9 +208,7 @@ namespace CyberSecurityAwarenessChatBot
                 }
 
                 // ACTIVITY LOG COMMANDS
-                if (input.ToLower().Contains("activity log") ||
-                    input.ToLower().Contains("show log") ||
-                    input.ToLower().Contains("what have you done"))
+                if (lowerInput.Contains("activity log") || lowerInput.Contains("show log") || lowerInput.Contains("what have you done"))
                 {
                     await ShowTemporaryThinking(1000);
                     string log = ActivityLogger.GetActivitySummary();
@@ -129,9 +218,7 @@ namespace CyberSecurityAwarenessChatBot
                 }
 
                 // HELP COMMANDS
-                if (input.ToLower().Contains("help") ||
-                    input.ToLower().Contains("what can you do") ||
-                    input.ToLower().Contains("commands"))
+                if (lowerInput.Contains("help") || lowerInput.Contains("what can you do") || lowerInput.Contains("commands"))
                 {
                     await ShowTemporaryThinking(800);
                     string help = @"Here's what I can help you with:
@@ -149,17 +236,15 @@ What would you like to do?";
                     return;
                 }
 
-                // ========== 1. TIP DETECTION ==========
-                // If user asks for a "tip", extract the topic and give a random response
-                if (input.ToLower().Contains("tip"))
+                // ========== TIP DETECTION ==========
+                if (lowerInput.Contains("tip"))
                 {
                     await ShowTemporaryThinking(1200);
                     string detectedTopic = null;
-                    string lower = input.ToLower();
-                    if (lower.Contains("password")) detectedTopic = "password";
-                    else if (lower.Contains("scam")) detectedTopic = "scam";
-                    else if (lower.Contains("privacy")) detectedTopic = "privacy";
-                    else if (lower.Contains("phishing")) detectedTopic = "phishing";
+                    if (lowerInput.Contains("password")) detectedTopic = "password";
+                    else if (lowerInput.Contains("scam")) detectedTopic = "scam";
+                    else if (lowerInput.Contains("privacy")) detectedTopic = "privacy";
+                    else if (lowerInput.Contains("phishing")) detectedTopic = "phishing";
 
                     if (detectedTopic != null && randomResponse.SupportsTopic(detectedTopic))
                     {
@@ -178,18 +263,16 @@ What would you like to do?";
                     }
                 }
 
-                // ========== 2. SENTIMENT DETECTION ==========
-                // Detect emotional tone and respond with empathy, then optionally give a tip
+                // ========== SENTIMENT DETECTION ==========
                 string sentiment = SentimentDetector.DetectSentiment(input);
                 if (!string.IsNullOrEmpty(sentiment))
                 {
                     await ShowTemporaryThinking(1200);
                     string detectedTopic = null;
-                    string lower = input.ToLower();
-                    if (lower.Contains("password")) detectedTopic = "password";
-                    else if (lower.Contains("scam")) detectedTopic = "scam";
-                    else if (lower.Contains("privacy")) detectedTopic = "privacy";
-                    else if (lower.Contains("phishing")) detectedTopic = "phishing";
+                    if (lowerInput.Contains("password")) detectedTopic = "password";
+                    else if (lowerInput.Contains("scam")) detectedTopic = "scam";
+                    else if (lowerInput.Contains("privacy")) detectedTopic = "privacy";
+                    else if (lowerInput.Contains("phishing")) detectedTopic = "phishing";
 
                     string empathyMsg = SentimentDetector.GetSentimentResponse(sentiment, detectedTopic);
                     if (!string.IsNullOrEmpty(empathyMsg))
@@ -206,8 +289,7 @@ What would you like to do?";
                     return;
                 }
 
-                // ========== 3. FOLLOW-UP REQUEST ==========
-                // If user asks "tell me more", give a different tip on the same topic
+                // ========== FOLLOW-UP REQUEST ==========
                 if (conversationManager.IsFollowUpRequest(input))
                 {
                     await ShowTemporaryThinking(1200);
@@ -226,9 +308,7 @@ What would you like to do?";
                     return;
                 }
 
-                // ========== 4. MEMORY: USER'S FAVORITE TOPIC ==========
-                // If user expresses interest in a topic, remember it for later
-                string lowerInput = input.ToLower();
+                // ========== MEMORY: FAVOURITE TOPIC ==========
                 if ((lowerInput.Contains("interested in") || lowerInput.Contains("i like") || lowerInput.Contains("my favourite")) &&
                     (lowerInput.Contains("password") || lowerInput.Contains("privacy") || lowerInput.Contains("scam") || lowerInput.Contains("phishing")))
                 {
@@ -248,8 +328,7 @@ What would you like to do?";
                     }
                 }
 
-                // ========== 5. KEYWORD RECOGNITION ==========
-                // Provide detailed answers for cybersecurity keywords (e.g., "password", "phishing")
+                // ========== KEYWORD RECOGNITION ==========
                 if (cyberBot.ContainsKeyword(input))
                 {
                     await ShowTemporaryThinking(1200);
@@ -260,8 +339,7 @@ What would you like to do?";
                     return;
                 }
 
-                // ========== 6. DEFAULT FALLBACK ==========
-                // When no pattern matches, ask user to rephrase
+                // ========== DEFAULT FALLBACK ==========
                 await ShowTemporaryThinking(1000);
                 string name = chatbot.GetUserName() ?? "friend";
                 string defaultMsg = $"I'm not sure I understand, {name}. Could you try rephrasing? Ask about passwords, scams, privacy, or phishing.";
@@ -274,17 +352,88 @@ What would you like to do?";
             }
         }
 
-        // Allows user to press Enter to send message instead of clicking Send button
+        // ========== TASK CREATION FLOW HELPER ==========
+
+        private async Task HandleTaskCreationFlow(string input)
+        {
+            switch (_taskState)
+            {
+                case TaskCreationState.AwaitingTitle:
+                    if (string.IsNullOrWhiteSpace(input))
+                    {
+                        await TypingStyle.TypeText(ChatDisplay, "Bot", "Title cannot be empty. Please enter a title.", Brushes.DarkBlue);
+                        return;
+                    }
+                    _pendingTaskTitle = input.Trim();
+                    _taskState = TaskCreationState.AwaitingDescription;
+                    await TypingStyle.TypeText(ChatDisplay, "Bot",
+                        $"Task title set to '{_pendingTaskTitle}'. Now enter a description (or type 'skip').",
+                        Brushes.DarkBlue);
+                    break;
+
+                case TaskCreationState.AwaitingDescription:
+                    if (input.ToLower() == "skip")
+                        _pendingTaskDescription = "";
+                    else
+                        _pendingTaskDescription = input.Trim();
+                    _taskState = TaskCreationState.AwaitingReminder;
+                    await TypingStyle.TypeText(ChatDisplay, "Bot",
+                        "Would you like to set a reminder? Enter a date (e.g., '2026-07-01') or type 'no' to skip.",
+                        Brushes.DarkBlue);
+                    break;
+
+                case TaskCreationState.AwaitingReminder:
+                    string reminderDate = null;
+                    if (input.ToLower() == "no")
+                    {
+                        reminderDate = null;
+                    }
+                    else if (DateTime.TryParse(input, out DateTime parsedDate))
+                    {
+                        reminderDate = parsedDate.ToString("yyyy-MM-dd");
+                    }
+                    else
+                    {
+                        await TypingStyle.TypeText(ChatDisplay, "Bot",
+                            "I didn't understand that date. Please enter a valid date (e.g., '2026-07-01') or type 'no'.",
+                            Brushes.DarkBlue);
+                        return;
+                    }
+
+                    int id = taskManager.AddTask(_pendingTaskTitle, _pendingTaskDescription, reminderDate);
+                    if (id > 0)
+                    {
+                        ActivityLogger.AddActivity($"Task added via chat: '{_pendingTaskTitle}'" +
+                            (reminderDate != null ? $" (Reminder: {reminderDate})" : ""));
+                        await TypingStyle.TypeText(ChatDisplay, "Bot",
+                            $"✅ Task '{_pendingTaskTitle}' added successfully! {(reminderDate != null ? $"I'll remind you on {reminderDate}." : "")}",
+                            Brushes.DarkBlue);
+                    }
+                    else
+                    {
+                        await TypingStyle.TypeText(ChatDisplay, "Bot",
+                            "Sorry, I couldn't save the task. Please try again later.",
+                            Brushes.DarkBlue);
+                    }
+
+                    _taskState = TaskCreationState.None;
+                    _pendingTaskTitle = "";
+                    _pendingTaskDescription = "";
+                    break;
+            }
+        }
+
+        // ========== OTHER HELPER METHODS ==========
+
         private void UserInput_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {
                 SendButton_Click(sender, null);
-                e.Handled = true;   // Suppress default beep sound
+                e.Handled = true;
             }
         }
 
-        // Returns a random friendly prefix using the user's name for personalization
         private string GetFriendlyPrefix()
         {
             string name = chatbot.GetUserName();
@@ -305,7 +454,6 @@ What would you like to do?";
             return prefixes[rnd.Next(prefixes.Length)];
         }
 
-        // Displays a temporary "Thinking..." message while processing, then removes it after delay
         private async Task ShowTemporaryThinking(int delayMs = 1500)
         {
             Paragraph tempParagraph = new Paragraph();
@@ -320,19 +468,16 @@ What would you like to do?";
                 ChatDisplay.Document.Blocks.Remove(tempParagraph);
         }
 
-        // ========== NEW PART 3 BUTTON CLICK HANDLERS ==========
+        // ========== BUTTON CLICK HANDLERS ==========
 
-        /// <summary>
-        /// Opens the Task Assistant window.
-        /// </summary>
         private void btnTasks_Click(object sender, RoutedEventArgs e)
         {
             try
             {
                 TaskWindow taskWindow = new TaskWindow();
-                taskWindow.Owner = this;   // set owner to main window
+                taskWindow.Owner = this;
                 taskWindow.Show();
-                taskWindow.Activate();     // bring to front
+                taskWindow.Activate();
             }
             catch (Exception ex)
             {
@@ -341,9 +486,6 @@ What would you like to do?";
             }
         }
 
-        /// <summary>
-        /// Opens the Cybersecurity Quiz window.
-        /// </summary>
         private void btnQuiz_Click(object sender, RoutedEventArgs e)
         {
             var quizWindow = new QuizWindow();
@@ -351,18 +493,12 @@ What would you like to do?";
             quizWindow.ShowDialog();
         }
 
-        /// <summary>
-        /// Displays the Activity Log in a message box.
-        /// </summary>
         private void btnLog_Click(object sender, RoutedEventArgs e)
         {
             string log = ActivityLogger.GetActivitySummary();
             MessageBox.Show(log, "Activity Log", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
-        /// <summary>
-        /// Displays a help menu with all available commands.
-        /// </summary>
         private void btnHelp_Click(object sender, RoutedEventArgs e)
         {
             string help = @"🎯 CyberSecurity ChatBot Help
@@ -383,20 +519,17 @@ Stay safe online! 🛡️";
             MessageBox.Show(help, "Help", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
-        // These empty methods are referenced in the XAML but not used.
-        private void ChatDisplay_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
-        {
-            // Intentionally empty
-        }
+        // Empty event handlers (XAML references)
+        private void ChatDisplay_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e) { }
+        private void ChatDisplay_TextChanged_1(object sender, System.Windows.Controls.TextChangedEventArgs e) { }
+        private void btnQuiz(object sender, RoutedEventArgs e) { }
 
-        private void ChatDisplay_TextChanged_1(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        // Clean up timer when window closes
+        protected override void OnClosed(EventArgs e)
         {
-            // Intentionally empty
-        }
-
-        private void btnQuiz(object sender, RoutedEventArgs e)
-        {
-
+            _reminderTimer?.Stop();
+            _reminderTimer?.Dispose();
+            base.OnClosed(e);
         }
     }
 }
