@@ -1,5 +1,8 @@
-﻿// MainWindow.xaml.cs - Full updated code with conversational task creation, proactive reminders,
-// and enhanced NLP to handle "remind me to..." and "set a reminder for..." commands.
+﻿// MainWindow.xaml.cs - Full code with:
+// - Safe TaskManager initialization (prevents startup crash if DB fails)
+// - Enhanced NLP: "remind me to..." and "set a reminder..." commands
+// - Proactive reminders via timer
+// - All existing features (quiz, log, sentiment, keyword responses, etc.)
 
 using System;
 using System.Threading.Tasks;
@@ -13,48 +16,69 @@ namespace CyberSecurityAwarenessChatBot
 {
     public partial class MainWindow : Window
     {
-        // Private fields for the chatbot's core components
+        // Core chatbot components
         private Chatbot chatbot;
         private CyberSecurityChatBot cyberBot;
         private RandomResponseManager randomResponse;
         private ConversationManager conversationManager;
         private bool awaitingName = true;
 
-        // Task management fields
-        private TaskManager taskManager;
+        // Task management (may be null if DB fails)
+        private TaskManager? taskManager;
         private enum TaskCreationState { None, AwaitingTitle, AwaitingDescription, AwaitingReminder }
         private TaskCreationState _taskState = TaskCreationState.None;
         private string _pendingTaskTitle = "";
         private string _pendingTaskDescription = "";
 
-        // Timer for checking reminders periodically
-        private System.Timers.Timer _reminderTimer;
+        // Timer for reminders
+        private System.Timers.Timer? _reminderTimer;
 
         // Constructor
         public MainWindow()
         {
             InitializeComponent();
 
+            // Set up chat display
             ChatDisplay.Document = new FlowDocument();
             ChatDisplay.Document.LineHeight = 1.2;
 
+            // Instantiate core helpers
             chatbot = new Chatbot();
             cyberBot = new CyberSecurityChatBot();
             randomResponse = new RandomResponseManager();
             conversationManager = new ConversationManager();
-            taskManager = new TaskManager(); // MySQL-backed
 
+            // ===== SAFELY INITIALIZE TASK MANAGER =====
+            try
+            {
+                taskManager = new TaskManager();
+            }
+            catch (Exception ex)
+            {
+                taskManager = null;
+                MessageBox.Show(
+                    $"Task Manager could not connect to the database.\n" +
+                    $"Tasks and reminders will be unavailable.\n\nError: {ex.Message}",
+                    "Database Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+            }
+
+            // Play greeting and show welcome
             AudioPlayer.PlayGreeting();
             DisplayWelcomeMessage();
 
-            // Set up the reminder timer (checks every 60 seconds for demo purposes)
-            _reminderTimer = new System.Timers.Timer(60000);
-            _reminderTimer.Elapsed += CheckReminders;
-            _reminderTimer.AutoReset = true;
-            _reminderTimer.Start();
+            // ===== START REMINDER TIMER ONLY IF DB WORKS =====
+            if (taskManager != null)
+            {
+                _reminderTimer = new System.Timers.Timer(60000); // 1 minute
+                _reminderTimer.Elapsed += CheckReminders;
+                _reminderTimer.AutoReset = true;
+                _reminderTimer.Start();
 
-            // Check reminders immediately on startup
-            CheckReminders(null, null);
+                // Check immediately
+                CheckReminders(null, null);
+            }
         }
 
         private async void DisplayWelcomeMessage()
@@ -63,8 +87,11 @@ namespace CyberSecurityAwarenessChatBot
             await TypingStyle.TypeText(ChatDisplay, "Bot", "What is your name?", Brushes.DarkBlue);
         }
 
-        private async void CheckReminders(object sender, ElapsedEventArgs e)
+        // Timer callback – checks for tasks due today
+        private async void CheckReminders(object? sender, ElapsedEventArgs? e)
         {
+            if (taskManager == null) return;
+
             var dueTasks = taskManager.GetTasksWithReminderToday();
             if (dueTasks.Count > 0)
             {
@@ -80,6 +107,7 @@ namespace CyberSecurityAwarenessChatBot
             }
         }
 
+        // Handles Send button and Enter key
         private async void SendButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -124,14 +152,21 @@ namespace CyberSecurityAwarenessChatBot
                     return;
                 }
 
-                // ========== NLP COMMANDS (HIGHEST PRIORITY) ==========
-
-                // 1. TASK / REMINDER COMMANDS
-                // Detect "remind me to ..." or "set a reminder for ..." and treat as task creation
+                // ========== NLP COMMANDS ==========
                 string lowerInput = input.ToLower();
+
+                // ---- "remind me to ..." or "set a reminder" ----
                 if (lowerInput.Contains("remind me to") || lowerInput.Contains("set a reminder"))
                 {
-                    // Extract the task title from the input
+                    if (taskManager == null)
+                    {
+                        await TypingStyle.TypeText(ChatDisplay, "Bot",
+                            "Sorry, the task manager is unavailable because the database is not connected. Please check your MySQL server.",
+                            Brushes.DarkBlue);
+                        UserInput.Clear();
+                        return;
+                    }
+
                     string title = "";
                     if (lowerInput.Contains("remind me to"))
                     {
@@ -158,7 +193,6 @@ namespace CyberSecurityAwarenessChatBot
                     }
                     else
                     {
-                        // Fallback: start generic task creation
                         _taskState = TaskCreationState.AwaitingTitle;
                         await TypingStyle.TypeText(ChatDisplay, "Bot",
                             "What task would you like to set a reminder for? Please enter a title.",
@@ -168,9 +202,18 @@ namespace CyberSecurityAwarenessChatBot
                     }
                 }
 
-                // Standard "add task" commands (already handled)
+                // ---- "add task", "new task", "create task" ----
                 if (lowerInput.Contains("add task") || lowerInput.Contains("new task") || lowerInput.Contains("create task"))
                 {
+                    if (taskManager == null)
+                    {
+                        await TypingStyle.TypeText(ChatDisplay, "Bot",
+                            "Sorry, the task manager is unavailable because the database is not connected. Please check your MySQL server.",
+                            Brushes.DarkBlue);
+                        UserInput.Clear();
+                        return;
+                    }
+
                     int colonIdx = input.IndexOf(':');
                     if (colonIdx > 0 && colonIdx < input.Length - 1)
                     {
@@ -195,7 +238,7 @@ namespace CyberSecurityAwarenessChatBot
                     return;
                 }
 
-                // QUIZ COMMANDS
+                // ---- Quiz ----
                 if (lowerInput.Contains("quiz") || lowerInput.Contains("start quiz") || lowerInput.Contains("take quiz"))
                 {
                     await ShowTemporaryThinking(800);
@@ -207,7 +250,7 @@ namespace CyberSecurityAwarenessChatBot
                     return;
                 }
 
-                // ACTIVITY LOG COMMANDS
+                // ---- Activity Log ----
                 if (lowerInput.Contains("activity log") || lowerInput.Contains("show log") || lowerInput.Contains("what have you done"))
                 {
                     await ShowTemporaryThinking(1000);
@@ -217,7 +260,7 @@ namespace CyberSecurityAwarenessChatBot
                     return;
                 }
 
-                // HELP COMMANDS
+                // ---- Help ----
                 if (lowerInput.Contains("help") || lowerInput.Contains("what can you do") || lowerInput.Contains("commands"))
                 {
                     await ShowTemporaryThinking(800);
@@ -236,7 +279,7 @@ What would you like to do?";
                     return;
                 }
 
-                // ========== TIP DETECTION ==========
+                // ---- Tip Detection ----
                 if (lowerInput.Contains("tip"))
                 {
                     await ShowTemporaryThinking(1200);
@@ -263,7 +306,7 @@ What would you like to do?";
                     }
                 }
 
-                // ========== SENTIMENT DETECTION ==========
+                // ---- Sentiment Detection ----
                 string sentiment = SentimentDetector.DetectSentiment(input);
                 if (!string.IsNullOrEmpty(sentiment))
                 {
@@ -289,7 +332,7 @@ What would you like to do?";
                     return;
                 }
 
-                // ========== FOLLOW-UP REQUEST ==========
+                // ---- Follow-up ----
                 if (conversationManager.IsFollowUpRequest(input))
                 {
                     await ShowTemporaryThinking(1200);
@@ -308,7 +351,7 @@ What would you like to do?";
                     return;
                 }
 
-                // ========== MEMORY: FAVOURITE TOPIC ==========
+                // ---- Memory: Favourite Topic ----
                 if ((lowerInput.Contains("interested in") || lowerInput.Contains("i like") || lowerInput.Contains("my favourite")) &&
                     (lowerInput.Contains("password") || lowerInput.Contains("privacy") || lowerInput.Contains("scam") || lowerInput.Contains("phishing")))
                 {
@@ -328,7 +371,7 @@ What would you like to do?";
                     }
                 }
 
-                // ========== KEYWORD RECOGNITION ==========
+                // ---- Keyword Recognition ----
                 if (cyberBot.ContainsKeyword(input))
                 {
                     await ShowTemporaryThinking(1200);
@@ -339,7 +382,7 @@ What would you like to do?";
                     return;
                 }
 
-                // ========== DEFAULT FALLBACK ==========
+                // ---- Default Fallback ----
                 await ShowTemporaryThinking(1000);
                 string name = chatbot.GetUserName() ?? "friend";
                 string defaultMsg = $"I'm not sure I understand, {name}. Could you try rephrasing? Ask about passwords, scams, privacy, or phishing.";
@@ -356,6 +399,16 @@ What would you like to do?";
 
         private async Task HandleTaskCreationFlow(string input)
         {
+            // This method is only called when taskManager is not null (guarded upstream)
+            if (taskManager == null)
+            {
+                await TypingStyle.TypeText(ChatDisplay, "Bot",
+                    "Task manager is unavailable. Please check your database connection.",
+                    Brushes.DarkBlue);
+                _taskState = TaskCreationState.None;
+                return;
+            }
+
             switch (_taskState)
             {
                 case TaskCreationState.AwaitingTitle:
@@ -423,7 +476,7 @@ What would you like to do?";
             }
         }
 
-        // ========== OTHER HELPER METHODS ==========
+        // ========== OTHER HELPERS ==========
 
         private void UserInput_KeyDown(object sender, KeyEventArgs e)
         {
@@ -472,6 +525,13 @@ What would you like to do?";
 
         private void btnTasks_Click(object sender, RoutedEventArgs e)
         {
+            if (taskManager == null)
+            {
+                MessageBox.Show("Task Manager is unavailable because the database is not connected. Please check your MySQL server.",
+                                "Database Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             try
             {
                 TaskWindow taskWindow = new TaskWindow();
@@ -519,7 +579,7 @@ Stay safe online! 🛡️";
             MessageBox.Show(help, "Help", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
-        // Empty event handlers (XAML references)
+        // Empty event handlers (referenced in XAML)
         private void ChatDisplay_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e) { }
         private void ChatDisplay_TextChanged_1(object sender, System.Windows.Controls.TextChangedEventArgs e) { }
         private void btnQuiz(object sender, RoutedEventArgs e) { }

@@ -10,8 +10,8 @@ namespace CyberSecurityAwarenessChatBot
 
         public TaskManager()
         {
-            // Replace with your MySQL connection details
-            connectionString = "Server=localhost;Database=CyberTasks;Uid=root;Pwd=yourpassword;";
+            // Replace with your MySQL credentials
+            connectionString = "Server=localhost;Database=CyberTasks;Uid=root;Pwd=Peropt01012001;";
             InitializeDatabase();
         }
 
@@ -130,7 +130,6 @@ namespace CyberSecurityAwarenessChatBot
             return null;
         }
 
-        // Get tasks whose reminder date is today (for proactive notifications)
         public List<CyberTask> GetTasksWithReminderToday()
         {
             var tasks = new List<CyberTask>();

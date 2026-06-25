@@ -21,7 +21,7 @@ namespace CyberSecurityAwarenessChatBot
         {
             questions = new List<QuizQuestion>
             {
-                // ========== MULTIPLE CHOICE QUESTIONS ==========
+                // ---- MULTIPLE CHOICE (9 questions) ----
                 new QuizQuestion
                 {
                     Question = "What is a strong password practice?",
@@ -80,39 +80,32 @@ namespace CyberSecurityAwarenessChatBot
                 },
                 new QuizQuestion
                 {
-                    Question = "Is it safe to use a password manager?",
-                    Options = new List<string> { "No, they are always compromised", "Yes, if using a reputable one", "Only if free", "They are the same as saving passwords in a browser" },
-                    CorrectAnswerIndex = 1,
-                    Explanation = "Reputable password managers are safe and recommended for storing complex passwords securely."
-                },
-                new QuizQuestion
-                {
                     Question = "What is social engineering?",
                     Options = new List<string> { "A type of computer virus", "Manipulating people into revealing information", "A programming language", "A type of hardware" },
                     CorrectAnswerIndex = 1,
                     Explanation = "Social engineering exploits human psychology to gain access to sensitive information."
                 },
 
-                // ========== TRUE/FALSE QUESTIONS (added for variety) ==========
+                // ---- TRUE/FALSE (3 questions) ----
                 new QuizQuestion
                 {
                     Question = "True or False: Using the same password for multiple accounts is safe.",
                     Options = new List<string> { "True", "False" },
-                    CorrectAnswerIndex = 1, // False
+                    CorrectAnswerIndex = 1,
                     Explanation = "Reusing passwords is dangerous – if one account is breached, all others become vulnerable."
                 },
                 new QuizQuestion
                 {
                     Question = "True or False: You should always click on links in emails from your bank to verify your account.",
                     Options = new List<string> { "True", "False" },
-                    CorrectAnswerIndex = 1, // False
+                    CorrectAnswerIndex = 1,
                     Explanation = "Never click links in unsolicited emails. Always type the bank's official URL directly into your browser."
                 },
                 new QuizQuestion
                 {
                     Question = "True or False: Antivirus software is the only protection you need against cyber threats.",
                     Options = new List<string> { "True", "False" },
-                    CorrectAnswerIndex = 1, // False
+                    CorrectAnswerIndex = 1,
                     Explanation = "Antivirus is important, but you also need strong passwords, 2FA, safe browsing habits, and regular updates."
                 }
             };
@@ -123,24 +116,18 @@ namespace CyberSecurityAwarenessChatBot
             currentQuestionIndex = 0;
             score = 0;
             isQuizActive = true;
-            // Shuffle questions for variety
             Random rnd = new Random();
             questions = questions.OrderBy(q => rnd.Next()).ToList();
         }
 
         public bool IsQuizActive() => isQuizActive;
 
-        public bool HasNextQuestion()
-        {
-            return currentQuestionIndex < questions.Count;
-        }
+        public bool HasNextQuestion() => currentQuestionIndex < questions.Count;
 
-        public QuizQuestion GetCurrentQuestion()
+        public QuizQuestion? GetCurrentQuestion()
         {
             if (currentQuestionIndex < questions.Count)
-            {
                 return questions[currentQuestionIndex];
-            }
             return null;
         }
 
@@ -170,7 +157,6 @@ namespace CyberSecurityAwarenessChatBot
         }
 
         public int GetScore() => score;
-
         public int GetTotalQuestions() => questions.Count;
 
         public string GetFinalMessage()
@@ -179,11 +165,11 @@ namespace CyberSecurityAwarenessChatBot
             int scorePercent = (score * 100) / total;
 
             if (scorePercent >= 80)
-                return $" Great job! You scored {score}/{total} ({scorePercent}%)! You're a cybersecurity pro!";
+                return $"🎉 Great job! You scored {score}/{total} ({scorePercent}%)! You're a cybersecurity pro!";
             else if (scorePercent >= 60)
-                return $" Good effort! You scored {score}/{total} ({scorePercent}%). Keep learning to become a cybersecurity expert!";
+                return $"👍 Good effort! You scored {score}/{total} ({scorePercent}%). Keep learning to become a cybersecurity expert!";
             else
-                return $" Keep learning! You scored {score}/{total} ({scorePercent}%). Review the topics we've discussed to improve your knowledge!";
+                return $"📚 Keep learning! You scored {score}/{total} ({scorePercent}%). Review the topics we've discussed to improve your knowledge!";
         }
     }
 
