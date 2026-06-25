@@ -325,17 +325,17 @@ What would you like to do?";
         /// <summary>
         /// Opens the Task Assistant window.
         /// </summary>
-        private void BtnTasks_Click(object sender, RoutedEventArgs e)
+        private void btnTasks_Click(object sender, RoutedEventArgs e)
         {
-            var taskWindow = new TaskWindow();
-            taskWindow.Owner = this;
-            taskWindow.ShowDialog();
+            // Opens the task window
+            TaskWindow taskWindow = new TaskWindow();
+            taskWindow.Show();
         }
 
         /// <summary>
         /// Opens the Cybersecurity Quiz window.
         /// </summary>
-        private void BtnQuiz_Click(object sender, RoutedEventArgs e)
+        private void btnQuiz_Click(object sender, RoutedEventArgs e)
         {
             var quizWindow = new QuizWindow();
             quizWindow.Owner = this;
@@ -345,7 +345,7 @@ What would you like to do?";
         /// <summary>
         /// Displays the Activity Log in a message box.
         /// </summary>
-        private void BtnLog_Click(object sender, RoutedEventArgs e)
+        private void btnLog_Click(object sender, RoutedEventArgs e)
         {
             string log = ActivityLogger.GetActivitySummary();
             MessageBox.Show(log, "Activity Log", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -354,7 +354,7 @@ What would you like to do?";
         /// <summary>
         /// Displays a help menu with all available commands.
         /// </summary>
-        private void BtnHelp_Click(object sender, RoutedEventArgs e)
+        private void btnHelp_Click(object sender, RoutedEventArgs e)
         {
             string help = @"🎯 CyberSecurity ChatBot Help
 
@@ -383,6 +383,11 @@ Stay safe online! 🛡️";
         private void ChatDisplay_TextChanged_1(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
             // Intentionally empty
+        }
+
+        private void btnQuiz(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

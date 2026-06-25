@@ -142,7 +142,10 @@ namespace CyberSecurityAwarenessChatBot
         }
     }
 
-    // Value Converters for the Task List
+    // =========================================================
+    // VALUE CONVERTERS (Nested safely inside the namespace)
+    // =========================================================
+
     public class BoolToStatusConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -174,13 +177,15 @@ namespace CyberSecurityAwarenessChatBot
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            if (value == null) return Visibility.Collapsed;
+            if (value == null || string.IsNullOrWhiteSpace(value.ToString()))
+                return Brushes.DarkSlateBlue; // Default non-overdue task color
 
             if (DateTime.TryParse(value.ToString(), out DateTime reminderDate))
             {
-                return reminderDate < DateTime.Today ? Visibility.Visible : Visibility.Collapsed;
+                // Returns Red if the current date has passed the deadline
+                return reminderDate < DateTime.Today ? Brushes.Red : Brushes.DarkSlateBlue;
             }
-            return Visibility.Collapsed;
+            return Brushes.DarkSlateBlue;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -189,3 +194,5 @@ namespace CyberSecurityAwarenessChatBot
         }
     }
 }
+
+

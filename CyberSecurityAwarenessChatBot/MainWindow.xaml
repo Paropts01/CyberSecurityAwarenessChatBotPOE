@@ -144,36 +144,36 @@
                 Style="{StaticResource RoundedButtonStyle}"
                 Click="SendButton_Click"/>
 
-        <Button Content="Quiz"
-                Width="70"
+        <Button Content="Quiz Game"
+                Width="91"
                 HorizontalAlignment="Right"
-                Margin="0,0,388,326"
+                Margin="0,0,367,326"
                 VerticalAlignment="Bottom"
                 Style="{StaticResource RoundedButtonStyle}"
-                Click="btnQuiz"/>
+                Click="btnQuiz_Click"/>
 
         <Button Content="Tasks"
-                Width="68"
+                Width="85"
                 HorizontalAlignment="Right"
-                Margin="0,0,294,326"
+                Margin="0,0,262,324"
                 VerticalAlignment="Bottom"
                 Style="{StaticResource RoundedButtonStyle}"
-                Click="btnTasks"/>
+                Click="btnTasks_Click"/>
 
         <Button Content="Log"
-                Width="68"
+                Width="82"
                 HorizontalAlignment="Right"
-                Margin="0,0,197,326"
+                Margin="0,0,156,324"
                 VerticalAlignment="Bottom"
                 Style="{StaticResource RoundedButtonStyle}"
-                Click="btnLog"/>
+                Click="btnLog_Click"/>
 
         <Button Content="Help"
-                Width="70"
+                Width="84"
                 HorizontalAlignment="Right"
-                Margin="0,0,92,326"
+                Margin="0,0,53,324"
                 VerticalAlignment="Bottom"
                 Style="{StaticResource RoundedButtonStyle}"
-                Click="btnHelp"/>
+                Click="btnHelp_Click"/>
     </Grid>
 </Window>
