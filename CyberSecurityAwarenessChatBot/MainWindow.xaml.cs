@@ -1,8 +1,4 @@
-﻿// MainWindow.xaml.cs - Full code with:
-// - Safe TaskManager initialization (prevents startup crash if DB fails)
-// - Enhanced NLP: "remind me to..." and "set a reminder..." commands
-// - Proactive reminders via timer
-// - All existing features (quiz, log, sentiment, keyword responses, etc.)
+﻿// MainWindow.xaml.cs - fixed to pass userName to QuizWindow and TaskWindow
 
 using System;
 using System.Threading.Tasks;
@@ -23,32 +19,29 @@ namespace CyberSecurityAwarenessChatBot
         private ConversationManager conversationManager;
         private bool awaitingName = true;
 
-        // Task management (may be null if DB fails)
+        // Task management
         private TaskManager? taskManager;
         private enum TaskCreationState { None, AwaitingTitle, AwaitingDescription, AwaitingReminder }
         private TaskCreationState _taskState = TaskCreationState.None;
         private string _pendingTaskTitle = "";
         private string _pendingTaskDescription = "";
 
-        // Timer for reminders
+        // Reminder timer
         private System.Timers.Timer? _reminderTimer;
 
-        // Constructor
         public MainWindow()
         {
             InitializeComponent();
 
-            // Set up chat display
             ChatDisplay.Document = new FlowDocument();
             ChatDisplay.Document.LineHeight = 1.2;
 
-            // Instantiate core helpers
             chatbot = new Chatbot();
             cyberBot = new CyberSecurityChatBot();
             randomResponse = new RandomResponseManager();
             conversationManager = new ConversationManager();
 
-            // ===== SAFELY INITIALIZE TASK MANAGER =====
+            // Safely init TaskManager
             try
             {
                 taskManager = new TaskManager();
@@ -64,19 +57,15 @@ namespace CyberSecurityAwarenessChatBot
                     MessageBoxImage.Warning);
             }
 
-            // Play greeting and show welcome
             AudioPlayer.PlayGreeting();
             DisplayWelcomeMessage();
 
-            // ===== START REMINDER TIMER ONLY IF DB WORKS =====
             if (taskManager != null)
             {
-                _reminderTimer = new System.Timers.Timer(60000); // 1 minute
+                _reminderTimer = new System.Timers.Timer(60000);
                 _reminderTimer.Elapsed += CheckReminders;
                 _reminderTimer.AutoReset = true;
                 _reminderTimer.Start();
-
-                // Check immediately
                 CheckReminders(null, null);
             }
         }
@@ -87,7 +76,6 @@ namespace CyberSecurityAwarenessChatBot
             await TypingStyle.TypeText(ChatDisplay, "Bot", "What is your name?", Brushes.DarkBlue);
         }
 
-        // Timer callback – checks for tasks due today
         private async void CheckReminders(object? sender, ElapsedEventArgs? e)
         {
             if (taskManager == null) return;
@@ -97,17 +85,17 @@ namespace CyberSecurityAwarenessChatBot
             {
                 await Dispatcher.InvokeAsync(async () =>
                 {
+                    string userName = chatbot.GetUserName() ?? "User";
                     foreach (var task in dueTasks)
                     {
                         await TypingStyle.TypeText(ChatDisplay, "Bot",
-                            $"🔔 Reminder: Task '{task.Title}' is due today! {(string.IsNullOrEmpty(task.Description) ? "" : $"Details: {task.Description}")}",
+                            $"🔔 Reminder, {userName}! Your task '{task.Title}' is due today! {(string.IsNullOrEmpty(task.Description) ? "" : $"Details: {task.Description}")}",
                             Brushes.DarkRed);
                     }
                 });
             }
         }
 
-        // Handles Send button and Enter key
         private async void SendButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -144,7 +132,7 @@ namespace CyberSecurityAwarenessChatBot
                     return;
                 }
 
-                // ========== TASK CREATION STATE MACHINE ==========
+                // ===== TASK CREATION STATE =====
                 if (_taskState != TaskCreationState.None)
                 {
                     await HandleTaskCreationFlow(input);
@@ -152,7 +140,6 @@ namespace CyberSecurityAwarenessChatBot
                     return;
                 }
 
-                // ========== NLP COMMANDS ==========
                 string lowerInput = input.ToLower();
 
                 // ---- "remind me to ..." or "set a reminder" ----
@@ -242,7 +229,8 @@ namespace CyberSecurityAwarenessChatBot
                 if (lowerInput.Contains("quiz") || lowerInput.Contains("start quiz") || lowerInput.Contains("take quiz"))
                 {
                     await ShowTemporaryThinking(800);
-                    var quizWindow = new QuizWindow();
+                    string userName = chatbot.GetUserName() ?? "User";
+                    var quizWindow = new QuizWindow(userName);   // ✅ pass userName
                     quizWindow.Owner = this;
                     quizWindow.ShowDialog();
                     await TypingStyle.TypeText(ChatDisplay, "Bot", "Quiz completed! Keep learning to stay safe online!", Brushes.DarkBlue);
@@ -395,11 +383,9 @@ What would you like to do?";
             }
         }
 
-        // ========== TASK CREATION FLOW HELPER ==========
-
+        // ===== TASK CREATION FLOW =====
         private async Task HandleTaskCreationFlow(string input)
         {
-            // This method is only called when taskManager is not null (guarded upstream)
             if (taskManager == null)
             {
                 await TypingStyle.TypeText(ChatDisplay, "Bot",
@@ -476,8 +462,6 @@ What would you like to do?";
             }
         }
 
-        // ========== OTHER HELPERS ==========
-
         private void UserInput_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
@@ -521,7 +505,7 @@ What would you like to do?";
                 ChatDisplay.Document.Blocks.Remove(tempParagraph);
         }
 
-        // ========== BUTTON CLICK HANDLERS ==========
+        // ===== BUTTON HANDLERS =====
 
         private void btnTasks_Click(object sender, RoutedEventArgs e)
         {
@@ -534,7 +518,8 @@ What would you like to do?";
 
             try
             {
-                TaskWindow taskWindow = new TaskWindow();
+                string userName = chatbot.GetUserName() ?? "User";
+                TaskWindow taskWindow = new TaskWindow(userName);   // ✅ pass userName
                 taskWindow.Owner = this;
                 taskWindow.Show();
                 taskWindow.Activate();
@@ -548,7 +533,8 @@ What would you like to do?";
 
         private void btnQuiz_Click(object sender, RoutedEventArgs e)
         {
-            var quizWindow = new QuizWindow();
+            string userName = chatbot.GetUserName() ?? "User";
+            var quizWindow = new QuizWindow(userName);   // ✅ pass userName
             quizWindow.Owner = this;
             quizWindow.ShowDialog();
         }
@@ -579,12 +565,10 @@ Stay safe online! 🛡️";
             MessageBox.Show(help, "Help", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
-        // Empty event handlers (referenced in XAML)
         private void ChatDisplay_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e) { }
         private void ChatDisplay_TextChanged_1(object sender, System.Windows.Controls.TextChangedEventArgs e) { }
         private void btnQuiz(object sender, RoutedEventArgs e) { }
 
-        // Clean up timer when window closes
         protected override void OnClosed(EventArgs e)
         {
             _reminderTimer?.Stop();

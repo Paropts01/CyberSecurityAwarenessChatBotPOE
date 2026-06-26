@@ -7,10 +7,12 @@ namespace CyberSecurityAwarenessChatBot
     public partial class QuizWindow : Window
     {
         private QuizManager quizManager;
+        private string _userName;
 
-        public QuizWindow()
+        public QuizWindow(string userName)
         {
             InitializeComponent();
+            _userName = userName;
             quizManager = new QuizManager();
             ActivityLogger.AddActivity("Quiz started");
             DisplayQuestion();
@@ -31,14 +33,10 @@ namespace CyberSecurityAwarenessChatBot
                 return;
             }
 
-            // Update progress
             txtProgress.Text = $"Question {quizManager.GetCurrentQuestionIndex() + 1} of {quizManager.GetTotalQuestions()}";
             txtScore.Text = $"Score: {quizManager.GetScore()}";
-
-            // Display question
             txtQuestion.Text = question.Question;
 
-            // Clear and create option buttons
             spOptions.Children.Clear();
             for (int i = 0; i < question.Options.Count; i++)
             {
@@ -46,23 +44,22 @@ namespace CyberSecurityAwarenessChatBot
                 {
                     Content = $"{(char)('A' + i)}. {question.Options[i]}",
                     Tag = i,
-                    FontSize = 14,
+                    FontSize = 16,
                     FontWeight = FontWeights.Medium,
                     Background = System.Windows.Media.Brushes.LightGray,
                     Foreground = System.Windows.Media.Brushes.Black,
                     BorderThickness = new Thickness(1),
                     BorderBrush = System.Windows.Media.Brushes.Gray,
-                    Height = 35,
-                    Margin = new Thickness(0, 3, 0, 3),
+                    Height = 40,
+                    Margin = new Thickness(0, 5, 0, 5),
                     HorizontalContentAlignment = HorizontalAlignment.Left,
-                    Padding = new Thickness(10, 0, 0, 0),
+                    Padding = new Thickness(15, 0, 0, 0),
                     Cursor = System.Windows.Input.Cursors.Hand
                 };
                 btn.Click += OptionButton_Click;
                 spOptions.Children.Add(btn);
             }
 
-            // Disable next button until answered
             btnNext.IsEnabled = false;
             txtFeedback.Text = "Select an option above to continue.";
             txtFeedback.Foreground = System.Windows.Media.Brushes.DarkSlateBlue;
@@ -74,62 +71,52 @@ namespace CyberSecurityAwarenessChatBot
             if (btn == null) return;
 
             int selectedIndex = (int)btn.Tag;
-
-            // Submit answer and get feedback
             string feedback;
             bool isCorrect;
             quizManager.SubmitAnswer(selectedIndex, out feedback, out isCorrect);
 
-            // Display feedback
             txtFeedback.Text = feedback;
             txtFeedback.Foreground = isCorrect ?
                 System.Windows.Media.Brushes.Green :
                 System.Windows.Media.Brushes.Red;
 
-            // Update score
             txtScore.Text = $"Score: {quizManager.GetScore()}";
 
-            // Disable all option buttons after answer
             foreach (var child in spOptions.Children)
             {
                 if (child is Button optionBtn)
                 {
                     optionBtn.IsEnabled = false;
-                    // Color correct/incorrect answers
                     int optionIndex = (int)optionBtn.Tag;
                     if (optionIndex == quizManager.GetCurrentQuestionIndex() - 1)
-                    {
-                        // This was the selected answer
                         optionBtn.Background = isCorrect ?
                             System.Windows.Media.Brushes.LightGreen :
                             System.Windows.Media.Brushes.LightCoral;
-                    }
                     else if (optionIndex == quizManager.GetCorrectAnswerIndex() && !isCorrect)
-                    {
-                        // Show the correct answer if user got it wrong
                         optionBtn.Background = System.Windows.Media.Brushes.LightGreen;
-                    }
                 }
             }
 
-            // Enable next button
             btnNext.IsEnabled = true;
         }
 
         private void ShowQuizComplete()
         {
+            // ===== PLAY THE CLAPPING SOUND =====
+            AudioPlayer.PlayClap();
+
             txtQuestion.Text = "🎉 Quiz Complete!";
             spOptions.Children.Clear();
 
             string finalMessage = quizManager.GetFinalMessage();
-            txtFeedback.Text = finalMessage;
+            string personalizedMessage = $"Well done, {_userName}!\n{finalMessage}";
+            txtFeedback.Text = personalizedMessage;
             txtFeedback.Foreground = System.Windows.Media.Brushes.DarkSlateBlue;
 
             btnNext.IsEnabled = false;
             txtProgress.Text = $"Completed! Total Questions: {quizManager.GetTotalQuestions()}";
             txtScore.Text = $"Final Score: {quizManager.GetScore()}/{quizManager.GetTotalQuestions()}";
 
-            // --- Activity Log: Quiz completed with score ---
             ActivityLogger.AddActivity($"Quiz completed - Score: {quizManager.GetScore()}/{quizManager.GetTotalQuestions()}");
         }
 
@@ -151,12 +138,11 @@ namespace CyberSecurityAwarenessChatBot
         }
     }
 
-    // Extension methods for QuizManager
+    // Extension methods (unchanged)
     public static class QuizManagerExtensions
     {
         public static int GetCurrentQuestionIndex(this QuizManager manager)
         {
-            // Reflection to get current index - alternatively, expose a property
             var field = manager.GetType().GetField("currentQuestionIndex",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             return (int)field.GetValue(manager);

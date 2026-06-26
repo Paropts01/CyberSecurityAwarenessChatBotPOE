@@ -5,9 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CyberSecurityAwarenessChatBot"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-
-    <!-- Add this Resources section with the button style -->
+        Title="CyberSecurity ChatBot"
+        Height="600" Width="900"
+        MinHeight="500" MinWidth="700"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="CanResize">
     <Window.Resources>
         <Style x:Key="RoundedButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="Lavender" />
@@ -31,7 +33,6 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-            <!-- Optional: hover effect to make it more interactive -->
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Background" Value="#4A6A7A" />
@@ -45,135 +46,128 @@
             <ImageBrush ImageSource="/pexels-codioful-7134987.jpg" Stretch="UniformToFill"/>
         </Grid.Background>
 
-        <!--Textbox for the ascii art logo-->
-        <Border BorderBrush="Transparent"
-                BorderThickness="3"
-                CornerRadius="15"
-                Padding="10"
+        <!-- Define rows and columns to match original placement -->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>      <!-- ASCII + title -->
+            <RowDefinition Height="*"/>         <!-- Chat display -->
+            <RowDefinition Height="Auto"/>      <!-- Input + Send -->
+            <RowDefinition Height="Auto"/>      <!-- Action buttons -->
+        </Grid.RowDefinitions>
+
+        <!-- 1. ASCII art + title (top‑left) -->
+        <Border Grid.Row="0"
+                Margin="20,5,0,0"
                 Background="Transparent"
                 HorizontalAlignment="Left"
-                VerticalAlignment="Top"
-                Margin="54,-5,0,0" Height="151" Width="237">
-            <StackPanel>
-                <!-- ASCII ART -->
-                <TextBlock FontFamily="Consolas"
-                           FontSize="9"
-                           FontWeight="Bold"
-                           Foreground="DarkSlateBlue"
-                           TextWrapping="NoWrap"
-                           HorizontalAlignment="Center" Width="279" Height="111">
-                    <Run Text="                  _(,__           __),&#10;"/>
-                    <Run Text="             (_,d888888888b,d888888888b&#10;"/>
-                    <Run Text="              d888888888888/888888888888b_)&#10;"/>
-                    <Run Text="           (_8888888P'&quot;&quot;&quot;'`Y8Y`'&quot;'&quot;&quot;Y88888&#10;"/>
-                    <Run Text="             Y8888P.-'     `      '-.Y8888b_)&#10;"/>
-                    <Run Text="            ,_Y88P (_(_(        )_)_) d88Y_,&#10;"/>
-                    <Run Text="             Y88b,  ( o )      ( o ) d8888P&#10;"/>
-                    <Run Text="             `Y888   '-'        '-'  `88Y`&#10;"/>
-                    <Run Text="             ,d/O\         c         /O\b,&#10;"/>
-                    <Run Text="               \_/'.,______w______,.'\_/"/>
-                </TextBlock>
+                VerticalAlignment="Top">
+            <StackPanel Orientation="Horizontal">
+                <!-- Viewbox makes ASCII scale with window -->
+                <Viewbox Width="220" Height="110" Margin="0,0,10,0">
+                    <TextBlock FontFamily="Consolas"
+                               FontSize="9"
+                               FontWeight="Bold"
+                               Foreground="DarkSlateBlue"
+                               TextWrapping="NoWrap">
+                        <Run Text="                  _(,__           __),&#10;"/>
+                        <Run Text="             (_,d888888888b,d888888888b&#10;"/>
+                        <Run Text="              d888888888888/888888888888b_)&#10;"/>
+                        <Run Text="           (_8888888P'&quot;&quot;&quot;'`Y8Y`'&quot;'&quot;&quot;Y88888&#10;"/>
+                        <Run Text="             Y8888P.-'     `      '-.Y8888b_)&#10;"/>
+                        <Run Text="            ,_Y88P (_(_(        )_)_) d88Y_,&#10;"/>
+                        <Run Text="             Y88b,  ( o )      ( o ) d8888P&#10;"/>
+                        <Run Text="             `Y888   '-'        '-'  `88Y`&#10;"/>
+                        <Run Text="             ,d/O\         c         /O\b,&#10;"/>
+                        <Run Text="               \_/'.,______w______,.'\_/"/>
+                    </TextBlock>
+                </Viewbox>
                 <TextBlock Text="CyberSecurity Awareness Chatbot"
-                           FontSize="12"
+                           FontSize="24"
                            FontWeight="Bold"
                            Foreground="DarkSlateBlue"
-                           HorizontalAlignment="Center"
-                           Margin="0,0,0,15" Height="24"/>
+                           VerticalAlignment="Center"
+                           TextWrapping="Wrap"
+                           Margin="10,0,0,0"/>
             </StackPanel>
         </Border>
 
-        <!-- CHAT DISPLAY -->
-        <Border CornerRadius="15"
-        BorderThickness="0"
-        Margin="54,151,53,90">
-
-            <Border.Background>
-                <SolidColorBrush Color="DarkSlateBlue"
-                         Opacity="0.20"/>
-            </Border.Background>
-
+        <!-- 2. Chat display (fills remaining space) -->
+        <Border Grid.Row="1"
+                CornerRadius="15"
+                Margin="30,10,30,10"
+                Background="#40483D8B">
             <RichTextBox Name="ChatDisplay"
-                 BorderThickness="0"
-                 Background="Transparent"
-                 Foreground="Black"
-                 FontSize="14"
-                 Padding="15"
-                 IsReadOnly="True"
-                 VerticalScrollBarVisibility="Auto"
-                 TextChanged="ChatDisplay_TextChanged_1" HorizontalAlignment="Center" Width="693"/>
-
+                         BorderThickness="0"
+                         Background="Transparent"
+                         Foreground="Black"
+                         FontSize="14"
+                         Padding="15"
+                         IsReadOnly="True"
+                         VerticalScrollBarVisibility="Auto"
+                         TextChanged="ChatDisplay_TextChanged_1"/>
         </Border>
 
-        <!-- USER INPUT -->
-        <Border CornerRadius="15"
-        Height="42"
-        Margin="54,0,120,20"
-        VerticalAlignment="Bottom"
-        BorderThickness="0">
+        <!-- 3. Input + Send button (bottom‑left) -->
+        <Grid Grid.Row="2"
+              Margin="30,0,30,15">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
 
-            <Border.Background>
-                <SolidColorBrush Color="DarkSlateBlue"
-                         Opacity="0.25"/>
-            </Border.Background>
+            <Border
+    CornerRadius="15"
+    Background="#40483D8B"
+    Padding="2">
+                <TextBox Name="UserInput"
+                         BorderThickness="0"
+                         Background="Transparent"
+                         Foreground="Black"
+                         FontSize="14"
+                         VerticalContentAlignment="Center"
+                         Padding="15,0"
+                         KeyDown="UserInput_KeyDown">
+                    <TextBox.Resources>
+                        <Style TargetType="TextBox">
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                        </Style>
+                    </TextBox.Resources>
+                </TextBox>
+            </Border>
 
-            <TextBox Name="UserInput"
-             BorderThickness="0"
-             Background="Transparent"
-             Foreground="Black"
-             FontSize="14"
-             VerticalContentAlignment="Center"
-             Padding="15,0"
-             KeyDown="UserInput_KeyDown">
+            <Button Grid.Column="1"
+                    Content="Send"
+                    Width="80"
+                    Margin="10,0,0,0"
+                    Style="{StaticResource RoundedButtonStyle}"
+                    Click="SendButton_Click"/>
+        </Grid>
 
-                <TextBox.Resources>
-                    <Style TargetType="TextBox">
-                        <Setter Property="FocusVisualStyle"
-                        Value="{x:Null}"/>
-                    </Style>
-                </TextBox.Resources>
-
-            </TextBox>
-
-        </Border>
-        <!-- Apply the style to all buttons -->
-        <Button Content="Send"
-                Width="69"
-                HorizontalAlignment="Right"
-                Margin="0,0,44,20"
-                VerticalAlignment="Bottom"
-                Style="{StaticResource RoundedButtonStyle}"
-                Click="SendButton_Click"/>
-
-        <Button Content="Quiz Game"
-                Width="91"
-                HorizontalAlignment="Right"
-                Margin="0,0,367,326"
-                VerticalAlignment="Bottom"
-                Style="{StaticResource RoundedButtonStyle}"
-                Click="btnQuiz_Click"/>
-
-        <Button Content="Tasks"
-                Width="85"
-                HorizontalAlignment="Right"
-                Margin="0,0,262,324"
-                VerticalAlignment="Bottom"
-                Style="{StaticResource RoundedButtonStyle}"
-                Click="btnTasks_Click"/>
-
-        <Button Content="Log"
-                Width="82"
-                HorizontalAlignment="Right"
-                Margin="0,0,156,324"
-                VerticalAlignment="Bottom"
-                Style="{StaticResource RoundedButtonStyle}"
-                Click="btnLog_Click"/>
-
-        <Button Content="Help"
-                Width="84"
-                HorizontalAlignment="Right"
-                Margin="0,0,53,324"
-                VerticalAlignment="Bottom"
-                Style="{StaticResource RoundedButtonStyle}"
-                Click="btnHelp_Click"/>
+        <!-- 4. Action buttons (bottom‑right) -->
+        <StackPanel Grid.Row="5"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Left"
+                    Margin="0,0,30,15">
+            <Button Content="Quiz Game"
+                    Width="100"
+                    Margin="5,0"
+                    Style="{StaticResource RoundedButtonStyle}"
+                    Click="btnQuiz_Click"/>
+            <Button Content="Tasks"
+                    Width="100"
+                    Margin="5,0"
+                    Style="{StaticResource RoundedButtonStyle}"
+                    Click="btnTasks_Click"/>
+            <Button Content="Log"
+                    Width="100"
+                    Margin="5,0"
+                    Style="{StaticResource RoundedButtonStyle}"
+                    Click="btnLog_Click"/>
+            <Button Content="Help"
+                    Width="100"
+                    Margin="5,0"
+                    Style="{StaticResource RoundedButtonStyle}"
+                    Click="btnHelp_Click"/>
+        </StackPanel>
     </Grid>
 </Window>
+

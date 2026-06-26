@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
@@ -11,10 +9,13 @@ namespace CyberSecurityAwarenessChatBot
     {
         private TaskManager taskManager;
         private CyberTask selectedTask;
+        private string _userName;
 
-        public TaskWindow()
+        // Constructor now accepts the user's name
+        public TaskWindow(string userName)
         {
             InitializeComponent();
+            _userName = userName;
             taskManager = new TaskManager();
             LoadTasks();
         }
@@ -42,7 +43,6 @@ namespace CyberSecurityAwarenessChatBot
             int id = taskManager.AddTask(title, description, reminderDate);
             if (id > 0)
             {
-                // --- Activity Log: Task added ---
                 ActivityLogger.AddActivity($"Task added: '{title}'" +
                     (reminderDate != null ? $" (Reminder: {reminderDate})" : ""));
 
@@ -89,7 +89,6 @@ namespace CyberSecurityAwarenessChatBot
             {
                 if (taskManager.MarkTaskAsComplete(selectedTask.Id))
                 {
-                    // --- Activity Log: Task completed ---
                     ActivityLogger.AddActivity($"Task completed: '{selectedTask.Title}'");
                     LoadTasks();
                     MessageBox.Show("Task marked as complete!", "Success",
@@ -119,7 +118,6 @@ namespace CyberSecurityAwarenessChatBot
             {
                 if (taskManager.DeleteTask(selectedTask.Id))
                 {
-                    // --- Activity Log: Task deleted ---
                     ActivityLogger.AddActivity($"Task deleted: '{selectedTask.Title}'");
                     selectedTask = null;
                     LoadTasks();
@@ -151,7 +149,7 @@ namespace CyberSecurityAwarenessChatBot
     }
 
     // =========================================================
-    // VALUE CONVERTERS (Nested safely inside the namespace)
+    // VALUE CONVERTERS (unchanged)
     // =========================================================
 
     public class BoolToStatusConverter : IValueConverter
@@ -186,11 +184,10 @@ namespace CyberSecurityAwarenessChatBot
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             if (value == null || string.IsNullOrWhiteSpace(value.ToString()))
-                return Brushes.DarkSlateBlue; // Default non-overdue task color
+                return Brushes.DarkSlateBlue;
 
             if (DateTime.TryParse(value.ToString(), out DateTime reminderDate))
             {
-                // Returns Red if the current date has passed the deadline
                 return reminderDate < DateTime.Today ? Brushes.Red : Brushes.DarkSlateBlue;
             }
             return Brushes.DarkSlateBlue;
