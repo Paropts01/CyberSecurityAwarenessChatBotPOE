@@ -1,7 +1,10 @@
 # Cyber Security Awareness Chat Bot
 
-# overview
-This project is a WPF desktop application that provides an interactive chatbot to educate users about cybersecurity topics such as password safety, scam detection, privacy protection, and phishing awareness. The bot engages users in a conversational manner, remembers their name and favorite topics, and responds with detailed tips, empathy, and follow-up suggestions.
+# overview Part 2
+This project is a WPF desktop application that provides an interactive Cyber Security chatbot to educate users about cybersecurity topics such as password safety, scam detection, privacy protection, and phishing awareness. The bot engages users in a conversational manner, remembers their name and favorite topics, and responds with detailed tips, empathy, and follow-up suggestions.
+
+# Overview Part 3
+The Chatbot fetures have been improved and are more advanced compared to Part 2. the features added are task window which collects,stores and remind the user about their tasks, Quiz game that asks cyber security questions, Activity log that stored the history of user activities and finally the help feature that help navigate the chatbot
 
 # Purpose
 The chatbot aims to raise cybersecurity awareness in an engaging, low‑pressure way. By varying responses, remembering user preferences, and showing empathy, it encourages users to learn about online safety without feeling overwhelmed. The project demonstrates practical use of WPF, asynchronous UI updates, sentiment analysis (keyword‑based), and conversation state management. This project was developed as part of a cybersecurity learning exercise. It demonstrates how programming can be used to promote awareness and educate users about online safety in an interactive and engaging way. 
@@ -18,6 +21,13 @@ The chatbot aims to raise cybersecurity awareness in an engaging, low‑pressure
 - Favourite topic memory – the bot remembers when a user says they are interested in a specific topic.
 - Exit command – typing “exit”, “quit”, or “goodbye” closes the application politely.
 
+# Recent core features
+- task window - setting, getting, deleting and completing tasks
+- quiz window - game with questions
+- clapping wav sound - cheers the user for completing the quiz
+- Activity log - stores history of activitiies
+- help - help navigate the chatbot
+
  # Architecture And Key Components
  - MainWindow.xaml.cs = Orchestrates the entire conversation flow: validates input, calls the appropriate manager classes, updates the UI with typing animations, and shows temporary “Thinking…” messages.
  - CyberSecurityChatBot = Stores long, comprehensive answers for the main topics (used when a keyword is detected without an explicit “tip” request).
@@ -27,6 +37,18 @@ The chatbot aims to raise cybersecurity awareness in an engaging, low‑pressure
  - Chatbot = Manages user‑specific data (name and favourite topic).
  - TypingStyle = Provides the character‑by‑character typing effect for messages.
  - AudioPlayer = Plays the greeting sound (handles exceptions gracefully).
+
+# Recent Architecture And Key Components
+- TaskWindow.xaml.cs - this window allows users to add tasks, delete tasks, mark completed tasks as complete, and refresh the list of tasks. The user can also set a date for a reminder and the system will keep track and remind the user of their due task. i stores all the tasks and reminders using mysql data storage
+- QuizWindow.xaml.cs- This window plays with the user by asking them cyber security questions, keeps track of the progress, calculates the score and a hands clapping sound is played whn the user finishes the quiestions.
+- ActivityLogger.cs - which stores all the history of the users actions or activities in the project.
+- Help feature that helps the user how to navigate the chatbot.
+- FLPProcessing.cs feature that detects the users intends it keyword detection and allowing tasks, quizes, logs on the chat display in the main window
+- TaskWindow.xaml - it is responsible for the desin of the task window
+- QuizWindow.xaml - it is responsible for the design of the quiz window
+- TaskManager.cs - manages all the task functions
+- Clapping hands wav sound - when the user completes the quizes the sound plays to congradulate them
+- Instant feedback - instant feedback is provided immidietly when the answer is pressed on the quizes
 
 # Conversation Flow
 - Start → Play greeting → Display welcome message → Ask for name.
