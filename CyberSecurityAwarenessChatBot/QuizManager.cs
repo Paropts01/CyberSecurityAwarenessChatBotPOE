@@ -153,11 +153,11 @@ namespace CyberSecurityAwarenessChatBot
             if (isCorrect)
             {
                 score++;
-                feedback = $"✅ Correct! {question.Explanation}";
+                feedback = $"Correct! {question.Explanation}";
             }
             else
             {
-                feedback = $"❌ Incorrect. The correct answer was: {question.Options[question.CorrectAnswerIndex]}\n{question.Explanation}";
+                feedback = $"Incorrect. The correct answer was: {question.Options[question.CorrectAnswerIndex]}\n{question.Explanation}";
             }
 
             currentQuestionIndex++;
@@ -174,11 +174,11 @@ namespace CyberSecurityAwarenessChatBot
             int scorePercent = (score * 100) / total;
 
             if (scorePercent >= 80)
-                return $"🎉 Great job! You scored {score}/{total} ({scorePercent}%)! You're a cybersecurity pro!";
+                return $"Great job! You scored {score}/{total} ({scorePercent}%)! You're a cybersecurity pro!";
             else if (scorePercent >= 60)
-                return $"👍 Good effort! You scored {score}/{total} ({scorePercent}%). Keep learning to become a cybersecurity expert!";
+                return $"Good effort! You scored {score}/{total} ({scorePercent}%). Keep learning to become a cybersecurity expert!";
             else
-                return $"📚 Keep learning! You scored {score}/{total} ({scorePercent}%). Review the topics we've discussed to improve your knowledge!";
+                return $"Keep learning! You scored {score}/{total} ({scorePercent}%). Review the topics we've discussed to improve your knowledge!";
         }
     }
 

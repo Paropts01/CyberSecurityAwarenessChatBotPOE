@@ -114,7 +114,7 @@ namespace CyberSecurityAwarenessChatBot
             // ===== PLAY THE CLAPPING SOUND =====
             AudioPlayer.PlayClap();
 
-            txtQuestion.Text = "🎉 Quiz Complete!";
+            txtQuestion.Text = " Quiz Complete!";
             spOptions.Children.Clear();
 
             string finalMessage = quizManager.GetFinalMessage();

@@ -95,7 +95,7 @@ namespace CyberSecurityAwarenessChatBot
                     foreach (var task in dueTasks)
                     {
                         await TypingStyle.TypeText(ChatDisplay, "Bot",
-                            $"🔔 Reminder, {userName}! Your task '{task.Title}' is due today! {(string.IsNullOrEmpty(task.Description) ? "" : $"Details: {task.Description}")}",
+                            $" Reminder, {userName}! Your task '{task.Title}' is due today! {(string.IsNullOrEmpty(task.Description) ? "" : $"Details: {task.Description}")}",
                             Brushes.DarkRed);
                     }
                 });
@@ -559,7 +559,7 @@ What would you like to do?";
 
         private void btnHelp_Click(object sender, RoutedEventArgs e)
         {
-            string help = @"🎯 CyberSecurity ChatBot Help
+            string help = @" CyberSecurity ChatBot Help
 
 Commands you can use:
 • Type 'task' or 'add task' - Open Task Assistant
@@ -573,7 +573,7 @@ You can also:
 • Say 'tell me more' for follow-up info
 • Share your feelings (worried, curious, frustrated)
 
-Stay safe online! 🛡️";
+Stay safe online! ";
             MessageBox.Show(help, "Help", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 

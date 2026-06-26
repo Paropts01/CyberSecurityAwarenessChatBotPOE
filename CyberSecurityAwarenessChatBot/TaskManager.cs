@@ -14,7 +14,7 @@ namespace CyberSecurityAwarenessChatBot
         // Initialises the task manager and ensures the Tasks table exists.
         public TaskManager()
         {
-            // Replace with your MySQL credentials
+            
             connectionString = "Server=localhost;Database=CyberTasks;Uid=root;Pwd=Peropt01012001;";
             InitializeDatabase();
         }
