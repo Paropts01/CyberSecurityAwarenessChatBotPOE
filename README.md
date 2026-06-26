@@ -62,6 +62,21 @@ The chatbot aims to raise cybersecurity awareness in an engaging, low‑pressure
 - Contains keyword? → Return detailed answer from CyberSecurityChatBot.
 - None of the above → Ask user to rephrase.
 - After each response → Clear input box → Scroll chat view.
+
+# Recent Added Conversation Flow
+- Start → Play greeting → Display welcome message → Ask for name.
+- User enters name → Store it → Show topic options → Ask what they want to learn about.
+- User message is processed in this order:
+- Exit command? → Goodbye and shut down.
+- User enters add task
+- FLPProcessor check for intent (add task)
+- user enter title, description and date for reminder
+- task added to database
+- Task window - user can delete, mark complete, show list
+- Quiz game - asks questions with answer options, user answers.
+- Activity logger - shows history
+- help - shows key detection, and navigation 
+
   
 # User Interface (XAML)
 - A centered border containing the title and a shield‑shaped ASCII art.
@@ -74,6 +89,9 @@ The chatbot aims to raise cybersecurity awareness in an engaging, low‑pressure
 - .NET (WPF) – for the desktop UI framework.
 - C# – all logic and asynchronous typing animations (async/await).
 - XAML – declarative UI layout and styling.
+
+# Recent Technologies Used
+- MyQSL.DATA package
   
 # Usage
 - click my github link which will take you to my resipoties then you click the CyberSecurityChatBot-Poe option.
@@ -83,6 +101,14 @@ The chatbot aims to raise cybersecurity awareness in an engaging, low‑pressure
 - Enter your name when prompted.
 - Ask questions related to cybersecurity topics provided by the bot.
 - Type "exit" or "Goodbye" to end the session.
+
+# Recent Usage
+- can add task via text area
+- intialise quiz via text area
+- play quiz game on the quiz window
+- add task
+- see you history
+- get help with navigation
 
   # Future improvements
   - Add more topics
@@ -103,6 +129,18 @@ user asks for questions
 -  <img width="1366" height="768" alt="Screenshot 2026-05-29 193846" src="https://github.com/user-attachments/assets/8070693d-9be9-4176-8aaa-5bf6e8d2fb3f" />
 error validation for empty insert
 -<img width="1366" height="768" alt="Screenshot 2026-05-29 194231" src="https://github.com/user-attachments/assets/cb3a15e3-ac73-4fa8-a791-b065e5442f0d" />
+
+# improvements screenshots
+- <img width="883" height="595" alt="Screenshot 2026-06-26 215511" src="https://github.com/user-attachments/assets/2ffc0f4f-6de5-47df-bc62-5a8082b2b121" />
+- <img width="786" height="543" alt="Screenshot 2026-06-26 215700" src="https://github.com/user-attachments/assets/84e2150b-611d-47c3-b26b-9f584ef39284" />
+- <img width="784" height="543" alt="Screenshot 2026-06-26 215624" src="https://github.com/user-attachments/assets/c6f63477-f4a3-40cc-bd51-9eb0e20fba44" />
+- <img width="885" height="593" alt="Screenshot 2026-06-26 215751" src="https://github.com/user-attachments/assets/1b6f0124-5c09-4cea-92c0-f7511d2339b5" />
+- <img width="877" height="588" alt="Screenshot 2026-06-26 215728" src="https://github.com/user-attachments/assets/8d52e2e1-16b8-425d-8add-b35cc327159c" /> 
+
+
+
+  
+
 
 
  
