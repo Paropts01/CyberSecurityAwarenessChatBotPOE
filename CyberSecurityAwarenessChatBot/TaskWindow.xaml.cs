@@ -5,13 +5,16 @@ using System.Windows.Media;
 
 namespace CyberSecurityAwarenessChatBot
 {
+ 
+    // Window for managing tasks (add, complete, delete, view).
+  
     public partial class TaskWindow : Window
     {
         private TaskManager taskManager;
         private CyberTask selectedTask;
         private string _userName;
 
-        // Constructor now accepts the user's name
+        //Initialises the task window with the given user name.
         public TaskWindow(string userName)
         {
             InitializeComponent();
@@ -20,6 +23,7 @@ namespace CyberSecurityAwarenessChatBot
             LoadTasks();
         }
 
+        //Fetches all tasks and updates the ListBox.
         private void LoadTasks()
         {
             var tasks = taskManager.GetAllTasks();
@@ -27,6 +31,7 @@ namespace CyberSecurityAwarenessChatBot
             lstTasks.Items.Refresh();
         }
 
+        // ----- Add Task -----
         private void btnAddTask_Click(object sender, RoutedEventArgs e)
         {
             string title = txtTaskTitle.Text.Trim();
@@ -61,11 +66,13 @@ namespace CyberSecurityAwarenessChatBot
             }
         }
 
+        // ----- Selection changed -----
         private void LstTasks_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             selectedTask = lstTasks.SelectedItem as CyberTask;
         }
 
+        // ----- Mark as Complete -----
         private void btnComplete_Click(object sender, RoutedEventArgs e)
         {
             if (selectedTask == null)
@@ -102,6 +109,7 @@ namespace CyberSecurityAwarenessChatBot
             }
         }
 
+        // ----- Delete Task -----
         private void btnDelete_Click(object sender, RoutedEventArgs e)
         {
             if (selectedTask == null)
@@ -132,26 +140,21 @@ namespace CyberSecurityAwarenessChatBot
             }
         }
 
-        private void btnRefresh_Click(object sender, RoutedEventArgs e)
-        {
-            LoadTasks();
-        }
+        // ----- Refresh -----
+        private void btnRefresh_Click(object sender, RoutedEventArgs e) => LoadTasks();
 
-        private void btnClearReminder_Click(object sender, RoutedEventArgs e)
-        {
-            dpReminder.SelectedDate = null;
-        }
+        // ----- Clear Date -----
+        private void btnClearReminder_Click(object sender, RoutedEventArgs e) => dpReminder.SelectedDate = null;
 
-        private void btnBack_Click(object sender, RoutedEventArgs e)
-        {
-            this.Close();
-        }
+        // ----- Back / Close -----
+        private void btnBack_Click(object sender, RoutedEventArgs e) => this.Close();
     }
 
     // =========================================================
-    // VALUE CONVERTERS (unchanged)
+    // VALUE CONVERTERS (used in XAML bindings)
     // =========================================================
 
+    //Converts bool to "✓" or "○" for task status.
     public class BoolToStatusConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -166,6 +169,7 @@ namespace CyberSecurityAwarenessChatBot
         }
     }
 
+    //Converts null to Visibility.Collapsed, non‑null to Visible.
     public class NullToVisibilityConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
@@ -179,6 +183,7 @@ namespace CyberSecurityAwarenessChatBot
         }
     }
 
+    //Converts reminder date to a brush: Red if overdue, otherwise DarkSlateBlue.
     public class OverdueConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

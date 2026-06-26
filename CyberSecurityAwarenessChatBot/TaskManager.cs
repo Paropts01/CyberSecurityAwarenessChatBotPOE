@@ -4,10 +4,14 @@ using MySql.Data.MySqlClient;
 
 namespace CyberSecurityAwarenessChatBot
 {
+    
+    // Handles database operations for tasks (CRUD and reminder checks).
+    
     public class TaskManager
     {
         private string connectionString;
 
+        // Initialises the task manager and ensures the Tasks table exists.
         public TaskManager()
         {
             // Replace with your MySQL credentials
@@ -15,6 +19,7 @@ namespace CyberSecurityAwarenessChatBot
             InitializeDatabase();
         }
 
+        //Creates the Tasks table if it does not exist.
         private void InitializeDatabase()
         {
             using var conn = new MySqlConnection(connectionString);
@@ -34,6 +39,7 @@ namespace CyberSecurityAwarenessChatBot
             cmd.ExecuteNonQuery();
         }
 
+        //>Adds a new task to the database. Returns the new task ID.
         public int AddTask(string title, string description = "", string? reminderDate = null)
         {
             using var conn = new MySqlConnection(connectionString);
@@ -53,6 +59,7 @@ namespace CyberSecurityAwarenessChatBot
             return Convert.ToInt32(cmd.ExecuteScalar());
         }
 
+        //Returns all tasks, ordered by creation date descending.
         public List<CyberTask> GetAllTasks()
         {
             var tasks = new List<CyberTask>();
@@ -80,6 +87,7 @@ namespace CyberSecurityAwarenessChatBot
             return tasks;
         }
 
+        //Marks a task as completed. Returns true if successful.
         public bool MarkTaskAsComplete(int taskId)
         {
             using var conn = new MySqlConnection(connectionString);
@@ -92,6 +100,7 @@ namespace CyberSecurityAwarenessChatBot
             return cmd.ExecuteNonQuery() > 0;
         }
 
+        //Deletes a task. Returns true if successful.
         public bool DeleteTask(int taskId)
         {
             using var conn = new MySqlConnection(connectionString);
@@ -104,6 +113,7 @@ namespace CyberSecurityAwarenessChatBot
             return cmd.ExecuteNonQuery() > 0;
         }
 
+        //Retrieves a single task by its ID.
         public CyberTask? GetTaskById(int taskId)
         {
             using var conn = new MySqlConnection(connectionString);
@@ -130,6 +140,7 @@ namespace CyberSecurityAwarenessChatBot
             return null;
         }
 
+        //Returns all incomplete tasks whose reminder date is today.
         public List<CyberTask> GetTasksWithReminderToday()
         {
             var tasks = new List<CyberTask>();
@@ -160,6 +171,7 @@ namespace CyberSecurityAwarenessChatBot
         }
     }
 
+    //Represents a single task entity.
     public class CyberTask
     {
         public int Id { get; set; }

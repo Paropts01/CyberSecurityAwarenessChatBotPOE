@@ -4,8 +4,14 @@ using System.Windows;
 
 namespace CyberSecurityAwarenessChatBot
 {
+  
+    //Provides static methods to play audio files (greeting and clapping).
+   
     public static class AudioPlayer
     {
+
+        // Plays the welcome sound (Welcome.wav). Shows a message box on error.
+
         public static void PlayGreeting()
         {
             try
@@ -19,10 +25,10 @@ namespace CyberSecurityAwarenessChatBot
             }
         }
 
-        // New: Play button click sound
        
-
-        // New: Play clapping sound when quiz is completed
+        // Plays the clapping sound (clapping.wav) when a quiz is completed.
+        // Errors are silently ignored.
+        
         public static void PlayClap()
         {
             try
@@ -32,7 +38,7 @@ namespace CyberSecurityAwarenessChatBot
             }
             catch
             {
-                // Silently fail
+                // Silently fail – no alert needed for a celebratory sound.
             }
         }
     }

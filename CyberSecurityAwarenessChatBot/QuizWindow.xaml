@@ -10,7 +10,9 @@
         MinHeight="400" MinWidth="600"
         ResizeMode="CanResize"
         WindowStartupLocation="CenterOwner">
+    <!--Window resources are used for converting values and styling -->
     <Window.Resources>
+        <!--Styling the buttons making it easy to use-->
         <Style x:Key="RoundedButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="Lavender"/>
             <Setter Property="Foreground" Value="DarkSlateBlue"/>
@@ -36,6 +38,7 @@
     </Window.Resources>
 
     <Grid>
+        <!--Background image for more appealing look-->
         <Grid.Background>
             <ImageBrush ImageSource="/pexels-codioful-7134987.jpg" Stretch="UniformToFill"/>
         </Grid.Background>

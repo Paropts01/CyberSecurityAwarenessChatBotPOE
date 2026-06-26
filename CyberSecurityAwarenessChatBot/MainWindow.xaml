@@ -10,7 +10,9 @@
         MinHeight="500" MinWidth="700"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanResize">
+    <!--Window resources for custom styling-->
     <Window.Resources>
+        <!--Style for rounded buttons-->
         <Style x:Key="RoundedButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="Lavender" />
             <Setter Property="Foreground" Value="DarkSlateBlue" />
@@ -48,10 +50,10 @@
 
         <!-- Define rows and columns to match original placement -->
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>      <!-- ASCII + title -->
-            <RowDefinition Height="*"/>         <!-- Chat display -->
-            <RowDefinition Height="Auto"/>      <!-- Input + Send -->
-            <RowDefinition Height="Auto"/>      <!-- Action buttons -->
+            <RowDefinition Height="Auto"/>     
+            <RowDefinition Height="*"/>        
+            <RowDefinition Height="Auto"/>      
+            <RowDefinition Height="Auto"/>      
         </Grid.RowDefinitions>
 
         <!-- 1. ASCII art + title (top‑left) -->

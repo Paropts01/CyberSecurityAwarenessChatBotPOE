@@ -1,6 +1,4 @@
-﻿// MainWindow.xaml.cs - fixed to pass userName to QuizWindow and TaskWindow
-
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
@@ -10,16 +8,20 @@ using System.Timers;
 
 namespace CyberSecurityAwarenessChatBot
 {
+   
+    // Main window of the Cyber Security Awareness Chat Bot.
+    // Handles UI events, message dispatching, task creation flow, and reminder checks.
+    
     public partial class MainWindow : Window
     {
-        // Core chatbot components
+        // ------------------- Core chatbot components -------------------
         private Chatbot chatbot;
         private CyberSecurityChatBot cyberBot;
         private RandomResponseManager randomResponse;
         private ConversationManager conversationManager;
         private bool awaitingName = true;
 
-        // Task management
+        // ------------------- Task management -------------------
         private TaskManager? taskManager;
         private enum TaskCreationState { None, AwaitingTitle, AwaitingDescription, AwaitingReminder }
         private TaskCreationState _taskState = TaskCreationState.None;
@@ -29,6 +31,7 @@ namespace CyberSecurityAwarenessChatBot
         // Reminder timer
         private System.Timers.Timer? _reminderTimer;
 
+        /// <summary>Initialises the main window, components, and starts the reminder timer.</summary>
         public MainWindow()
         {
             InitializeComponent();
@@ -41,7 +44,7 @@ namespace CyberSecurityAwarenessChatBot
             randomResponse = new RandomResponseManager();
             conversationManager = new ConversationManager();
 
-            // Safely init TaskManager
+            // Safely initialise TaskManager (may fail if MySQL is unavailable)
             try
             {
                 taskManager = new TaskManager();
@@ -60,22 +63,25 @@ namespace CyberSecurityAwarenessChatBot
             AudioPlayer.PlayGreeting();
             DisplayWelcomeMessage();
 
+            // Set up a timer to check for due reminders every minute
             if (taskManager != null)
             {
                 _reminderTimer = new System.Timers.Timer(60000);
                 _reminderTimer.Elapsed += CheckReminders;
                 _reminderTimer.AutoReset = true;
                 _reminderTimer.Start();
-                CheckReminders(null, null);
+                CheckReminders(null, null); // immediate check on startup
             }
         }
 
+        //Displays the initial welcome message and asks for the user's name.
         private async void DisplayWelcomeMessage()
         {
             await TypingStyle.TypeText(ChatDisplay, "Bot", "Hello! Welcome to the Cyber Security Awareness Chat Bot!", Brushes.DarkBlue);
             await TypingStyle.TypeText(ChatDisplay, "Bot", "What is your name?", Brushes.DarkBlue);
         }
 
+        //Checks for tasks with reminders due today and displays them.
         private async void CheckReminders(object? sender, ElapsedEventArgs? e)
         {
             if (taskManager == null) return;
@@ -96,6 +102,7 @@ namespace CyberSecurityAwarenessChatBot
             }
         }
 
+        // ------------------- Send button and main message handling -------------------
         private async void SendButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -107,9 +114,10 @@ namespace CyberSecurityAwarenessChatBot
                     return;
                 }
 
+                // Display the user's message in the chat
                 await TypingStyle.TypeText(ChatDisplay, "You", input, Brushes.DarkSlateBlue);
 
-                // Exit command
+                // ----- Exit command -----
                 if (input.ToLower() == "exit" || input.ToLower() == "quit" || input.ToLower() == "goodbye")
                 {
                     string userName = chatbot.GetUserName() ?? "friend";
@@ -119,7 +127,7 @@ namespace CyberSecurityAwarenessChatBot
                     return;
                 }
 
-                // First interaction: get name
+                // ----- First interaction: get name -----
                 if (awaitingName)
                 {
                     chatbot.SetUserName(input);
@@ -142,7 +150,7 @@ namespace CyberSecurityAwarenessChatBot
 
                 string lowerInput = input.ToLower();
 
-                // ---- "remind me to ..." or "set a reminder" ----
+                // ----- "remind me to ..." or "set a reminder" -----
                 if (lowerInput.Contains("remind me to") || lowerInput.Contains("set a reminder"))
                 {
                     if (taskManager == null)
@@ -189,7 +197,7 @@ namespace CyberSecurityAwarenessChatBot
                     }
                 }
 
-                // ---- "add task", "new task", "create task" ----
+                // ----- "add task", "new task", "create task" -----
                 if (lowerInput.Contains("add task") || lowerInput.Contains("new task") || lowerInput.Contains("create task"))
                 {
                     if (taskManager == null)
@@ -225,12 +233,12 @@ namespace CyberSecurityAwarenessChatBot
                     return;
                 }
 
-                // ---- Quiz ----
+                // ----- Quiz -----
                 if (lowerInput.Contains("quiz") || lowerInput.Contains("start quiz") || lowerInput.Contains("take quiz"))
                 {
                     await ShowTemporaryThinking(800);
                     string userName = chatbot.GetUserName() ?? "User";
-                    var quizWindow = new QuizWindow(userName);   // ✅ pass userName
+                    var quizWindow = new QuizWindow(userName);
                     quizWindow.Owner = this;
                     quizWindow.ShowDialog();
                     await TypingStyle.TypeText(ChatDisplay, "Bot", "Quiz completed! Keep learning to stay safe online!", Brushes.DarkBlue);
@@ -238,7 +246,7 @@ namespace CyberSecurityAwarenessChatBot
                     return;
                 }
 
-                // ---- Activity Log ----
+                // ----- Activity Log -----
                 if (lowerInput.Contains("activity log") || lowerInput.Contains("show log") || lowerInput.Contains("what have you done"))
                 {
                     await ShowTemporaryThinking(1000);
@@ -248,7 +256,7 @@ namespace CyberSecurityAwarenessChatBot
                     return;
                 }
 
-                // ---- Help ----
+                // ----- Help -----
                 if (lowerInput.Contains("help") || lowerInput.Contains("what can you do") || lowerInput.Contains("commands"))
                 {
                     await ShowTemporaryThinking(800);
@@ -267,7 +275,7 @@ What would you like to do?";
                     return;
                 }
 
-                // ---- Tip Detection ----
+                // ----- Tip Detection -----
                 if (lowerInput.Contains("tip"))
                 {
                     await ShowTemporaryThinking(1200);
@@ -294,7 +302,7 @@ What would you like to do?";
                     }
                 }
 
-                // ---- Sentiment Detection ----
+                // ----- Sentiment Detection -----
                 string sentiment = SentimentDetector.DetectSentiment(input);
                 if (!string.IsNullOrEmpty(sentiment))
                 {
@@ -320,7 +328,7 @@ What would you like to do?";
                     return;
                 }
 
-                // ---- Follow-up ----
+                // ----- Follow-up -----
                 if (conversationManager.IsFollowUpRequest(input))
                 {
                     await ShowTemporaryThinking(1200);
@@ -339,7 +347,7 @@ What would you like to do?";
                     return;
                 }
 
-                // ---- Memory: Favourite Topic ----
+                // ----- Memory: Favourite Topic -----
                 if ((lowerInput.Contains("interested in") || lowerInput.Contains("i like") || lowerInput.Contains("my favourite")) &&
                     (lowerInput.Contains("password") || lowerInput.Contains("privacy") || lowerInput.Contains("scam") || lowerInput.Contains("phishing")))
                 {
@@ -359,7 +367,7 @@ What would you like to do?";
                     }
                 }
 
-                // ---- Keyword Recognition ----
+                // ----- Keyword Recognition -----
                 if (cyberBot.ContainsKeyword(input))
                 {
                     await ShowTemporaryThinking(1200);
@@ -370,7 +378,7 @@ What would you like to do?";
                     return;
                 }
 
-                // ---- Default Fallback ----
+                // ----- Default Fallback -----
                 await ShowTemporaryThinking(1000);
                 string name = chatbot.GetUserName() ?? "friend";
                 string defaultMsg = $"I'm not sure I understand, {name}. Could you try rephrasing? Ask about passwords, scams, privacy, or phishing.";
@@ -383,7 +391,7 @@ What would you like to do?";
             }
         }
 
-        // ===== TASK CREATION FLOW =====
+        // ===== TASK CREATION FLOW (multi‑step wizard) =====
         private async Task HandleTaskCreationFlow(string input)
         {
             if (taskManager == null)
@@ -462,6 +470,8 @@ What would you like to do?";
             }
         }
 
+        // ------------------- UI Helpers -------------------
+
         private void UserInput_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
@@ -471,6 +481,7 @@ What would you like to do?";
             }
         }
 
+        //Returns a friendly, randomised prefix to make bot responses more personal.
         private string GetFriendlyPrefix()
         {
             string name = chatbot.GetUserName();
@@ -491,6 +502,7 @@ What would you like to do?";
             return prefixes[rnd.Next(prefixes.Length)];
         }
 
+        //Shows a temporary "Thinking..." message for a short delay.
         private async Task ShowTemporaryThinking(int delayMs = 1500)
         {
             Paragraph tempParagraph = new Paragraph();
@@ -505,7 +517,7 @@ What would you like to do?";
                 ChatDisplay.Document.Blocks.Remove(tempParagraph);
         }
 
-        // ===== BUTTON HANDLERS =====
+        // ------------------- Button Handlers -------------------
 
         private void btnTasks_Click(object sender, RoutedEventArgs e)
         {
@@ -519,7 +531,7 @@ What would you like to do?";
             try
             {
                 string userName = chatbot.GetUserName() ?? "User";
-                TaskWindow taskWindow = new TaskWindow(userName);   // ✅ pass userName
+                TaskWindow taskWindow = new TaskWindow(userName);
                 taskWindow.Owner = this;
                 taskWindow.Show();
                 taskWindow.Activate();
@@ -534,7 +546,7 @@ What would you like to do?";
         private void btnQuiz_Click(object sender, RoutedEventArgs e)
         {
             string userName = chatbot.GetUserName() ?? "User";
-            var quizWindow = new QuizWindow(userName);   // ✅ pass userName
+            var quizWindow = new QuizWindow(userName);
             quizWindow.Owner = this;
             quizWindow.ShowDialog();
         }
@@ -565,10 +577,12 @@ Stay safe online! 🛡️";
             MessageBox.Show(help, "Help", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
+        // Empty event handlers (kept to avoid XAML errors)
         private void ChatDisplay_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e) { }
         private void ChatDisplay_TextChanged_1(object sender, System.Windows.Controls.TextChangedEventArgs e) { }
         private void btnQuiz(object sender, RoutedEventArgs e) { }
 
+        //Clean up the reminder timer when the window closes.
         protected override void OnClosed(EventArgs e)
         {
             _reminderTimer?.Stop();

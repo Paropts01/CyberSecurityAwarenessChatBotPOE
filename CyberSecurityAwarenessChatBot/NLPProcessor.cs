@@ -4,12 +4,20 @@ using System.Linq;
 
 namespace CyberSecurityAwarenessChatBot
 {
+    
+    // Simple natural language processor that detects intents from user input.
+    
     public static class NLPProcessor
     {
+        
+        //Detects the intent of the user's input.
+        // Returns one of: "TASK", "QUIZ", "SUMMARY", "PASSWORD", "PHISHING", or "UNKNOWN".
+        
         public static string DetectIntent(string input)
         {
             input = input.ToLower();
 
+            // Task-related keywords
             if (ContainsAny(input,
                 "task",
                 "add task",
@@ -27,6 +35,7 @@ namespace CyberSecurityAwarenessChatBot
                 return "TASK";
             }
 
+            // Quiz-related keywords
             if (ContainsAny(input,
                 "quiz",
                 "test",
@@ -38,6 +47,7 @@ namespace CyberSecurityAwarenessChatBot
                 return "QUIZ";
             }
 
+            // Activity log / summary
             if (ContainsAny(input,
                 "activity",
                 "activity log",
@@ -49,6 +59,7 @@ namespace CyberSecurityAwarenessChatBot
                 return "SUMMARY";
             }
 
+            // Password topics
             if (ContainsAny(input,
                 "password",
                 "passphrase",
@@ -57,6 +68,7 @@ namespace CyberSecurityAwarenessChatBot
                 return "PASSWORD";
             }
 
+            // Phishing / scam topics
             if (ContainsAny(input,
                 "phishing",
                 "scam",
@@ -69,6 +81,7 @@ namespace CyberSecurityAwarenessChatBot
             return "UNKNOWN";
         }
 
+        //Helper: checks if the text contains any of the given keywords.
         private static bool ContainsAny(string text, params string[] keywords)
         {
             return keywords.Any(keyword => text.Contains(keyword));

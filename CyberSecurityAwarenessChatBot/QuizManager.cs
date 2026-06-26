@@ -4,6 +4,7 @@ using System.Linq;
 
 namespace CyberSecurityAwarenessChatBot
 {
+    // Manages the quiz state: questions, scoring, and progression.
     public class QuizManager
     {
         private List<QuizQuestion> questions;
@@ -11,12 +12,14 @@ namespace CyberSecurityAwarenessChatBot
         private int score;
         private bool isQuizActive;
 
+        //Initialises the manager and loads all questions.
         public QuizManager()
         {
             InitializeQuestions();
             ResetQuiz();
         }
 
+        //Builds the question bank (12 questions, including true/false).
         private void InitializeQuestions()
         {
             questions = new List<QuizQuestion>
@@ -111,6 +114,7 @@ namespace CyberSecurityAwarenessChatBot
             };
         }
 
+        //Resets the quiz: shuffles questions, resets score and index.
         public void ResetQuiz()
         {
             currentQuestionIndex = 0;
@@ -131,6 +135,10 @@ namespace CyberSecurityAwarenessChatBot
             return null;
         }
 
+        
+        // Submits an answer for the current question.
+        // Returns true if submission succeeded; outputs feedback and whether it was correct.
+        
         public bool SubmitAnswer(int answerIndex, out string feedback, out bool isCorrect)
         {
             var question = GetCurrentQuestion();
@@ -159,6 +167,7 @@ namespace CyberSecurityAwarenessChatBot
         public int GetScore() => score;
         public int GetTotalQuestions() => questions.Count;
 
+        //Generates a final message based on the score percentage.
         public string GetFinalMessage()
         {
             int total = GetTotalQuestions();
@@ -173,6 +182,7 @@ namespace CyberSecurityAwarenessChatBot
         }
     }
 
+    //Represents a single quiz question.
     public class QuizQuestion
     {
         public string? Question { get; set; }

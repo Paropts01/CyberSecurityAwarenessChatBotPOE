@@ -4,11 +4,15 @@ using System.Windows.Controls;
 
 namespace CyberSecurityAwarenessChatBot
 {
+    
+    // Window that displays the cybersecurity quiz.
+    
     public partial class QuizWindow : Window
     {
         private QuizManager quizManager;
         private string _userName;
 
+        //Initialises the quiz window with the given user name.
         public QuizWindow(string userName)
         {
             InitializeComponent();
@@ -18,6 +22,7 @@ namespace CyberSecurityAwarenessChatBot
             DisplayQuestion();
         }
 
+        //Displays the current question and its answer options.
         private void DisplayQuestion()
         {
             if (!quizManager.HasNextQuestion())
@@ -37,6 +42,7 @@ namespace CyberSecurityAwarenessChatBot
             txtScore.Text = $"Score: {quizManager.GetScore()}";
             txtQuestion.Text = question.Question;
 
+            // Clear previous options and create new buttons
             spOptions.Children.Clear();
             for (int i = 0; i < question.Options.Count; i++)
             {
@@ -65,6 +71,7 @@ namespace CyberSecurityAwarenessChatBot
             txtFeedback.Foreground = System.Windows.Media.Brushes.DarkSlateBlue;
         }
 
+        //Handles option button clicks: checks answer, updates feedback and score.
         private void OptionButton_Click(object sender, RoutedEventArgs e)
         {
             var btn = sender as Button;
@@ -82,6 +89,7 @@ namespace CyberSecurityAwarenessChatBot
 
             txtScore.Text = $"Score: {quizManager.GetScore()}";
 
+            // Disable all options and colour them based on correctness
             foreach (var child in spOptions.Children)
             {
                 if (child is Button optionBtn)
@@ -100,6 +108,7 @@ namespace CyberSecurityAwarenessChatBot
             btnNext.IsEnabled = true;
         }
 
+        //Displays the final score and plays the clapping sound.
         private void ShowQuizComplete()
         {
             // ===== PLAY THE CLAPPING SOUND =====
@@ -120,25 +129,18 @@ namespace CyberSecurityAwarenessChatBot
             ActivityLogger.AddActivity($"Quiz completed - Score: {quizManager.GetScore()}/{quizManager.GetTotalQuestions()}");
         }
 
-        private void BtnNext_Click(object sender, RoutedEventArgs e)
-        {
-            DisplayQuestion();
-        }
-
+        // ----- Button handlers -----
+        private void BtnNext_Click(object sender, RoutedEventArgs e) => DisplayQuestion();
         private void BtnRestart_Click(object sender, RoutedEventArgs e)
         {
             quizManager.ResetQuiz();
             ActivityLogger.AddActivity("Quiz restarted");
             DisplayQuestion();
         }
-
-        private void BtnClose_Click(object sender, RoutedEventArgs e)
-        {
-            this.Close();
-        }
+        private void BtnClose_Click(object sender, RoutedEventArgs e) => this.Close();
     }
 
-    // Extension methods (unchanged)
+    // ----- Extension methods (to access private fields via reflection – used only for UI feedback) -----
     public static class QuizManagerExtensions
     {
         public static int GetCurrentQuestionIndex(this QuizManager manager)
